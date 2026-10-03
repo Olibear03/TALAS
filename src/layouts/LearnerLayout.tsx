@@ -1,6 +1,7 @@
 ﻿import { NavLink, Outlet, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Compass, Lock, Bandage, TrendingUp, Check, Printer, SquarePen, type LucideIcon } from 'lucide-react'
 import { learnerProfile, crlaLabel, crlaDescription } from '../features/teacher/dashboard/sectionData'
+import { useReadingAttempts } from '../features/teacher/profile/useReadingAttempts'
 
 const TABS: { to: string; label: string; icon: LucideIcon; end?: boolean }[] = [
   { to: '', label: 'Overview', icon: Compass, end: true },
@@ -19,6 +20,9 @@ function LearnerLayout() {
   const { learnerId } = useParams()
   const profile = learnerProfile(learnerId)
   const base = `/teacher/learners/${learnerId}`
+  // Latest submission (newest first) — the "Review Assessment" button opens it.
+  const { attempts } = useReadingAttempts(learnerId)
+  const latestAttempt = attempts[0]
 
   if (!profile) {
     return (
@@ -117,13 +121,24 @@ function LearnerLayout() {
           <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto shrink-0">
             <button
               type="button"
+              onClick={() => window.print()}
               className="flex-1 lg:flex-none h-11 px-4 rounded-xl bg-paper border border-gray-200 hover:bg-gray-50 text-charcoal font-sans text-sm font-semibold inline-flex items-center justify-center gap-2 transition-colors"
             >
               <Printer className="w-4 h-4" aria-hidden /> Print Learner Card
             </button>
             <button
               type="button"
-              className="flex-1 lg:flex-none h-11 px-5 rounded-xl bg-sprout-500 hover:opacity-95 text-white font-sans text-sm font-semibold inline-flex items-center justify-center gap-2 transition-all shadow-sm"
+              disabled={!latestAttempt}
+              onClick={() =>
+                latestAttempt &&
+                navigate(`/teacher/activities/${latestAttempt.id}/review`)
+              }
+              title={
+                latestAttempt
+                  ? 'Review the latest submitted reading'
+                  : 'No submission to review yet'
+              }
+              className="flex-1 lg:flex-none h-11 px-5 rounded-xl bg-sprout-500 hover:opacity-95 text-white font-sans text-sm font-semibold inline-flex items-center justify-center gap-2 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <SquarePen className="w-4 h-4" aria-hidden /> Review Assessment
             </button>

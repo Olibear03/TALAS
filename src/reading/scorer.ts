@@ -85,56 +85,77 @@ export function wordsMatch(a: string, b: string): boolean {
 }
 
 /**
- * Greedy in-order alignment of `spoken` onto `expected`, returning a mask of
- * which expected words were matched. This mirrors the live `readingProgress`
- * logic so the final score agrees with what the learner saw while reading:
+ * Global sequence alignment (Needleman–Wunsch) of `spoken` onto `expected`.
  *
- *  - matches each spoken word at/after the current cursor,
- *  - tolerates small skips via a lookahead window, and if the window misses,
- *    scans further ahead so a longer skip re-syncs instead of failing the rest,
- *  - uses fuzzy word equality (recognizer near-misses still count),
- *  - never un-marks a word already matched.
+ * This replaces the old greedy left-to-right matcher, which caused two bugs:
+ *   - a repeated word could match the WRONG occurrence (marking a later
+ *     duplicate correct and skipping the one the reader actually read), and
+ *   - a correctly-read word got marked wrong when the matcher jumped the cursor
+ *     past it to re-sync after a dropped recognizer token.
+ *
+ * A full DP alignment finds the globally optimal pairing between the expected
+ * words and the spoken words, so matches land in their correct positions,
+ * duplicates align to the right occurrence, and a single dropped/extra token
+ * doesn't cascade into everything after it.
+ *
+ * Returns, for each expected word, whether it was matched and which spoken
+ * word index it aligned to (-1 if none) — the latter drives word-level timing.
  */
 function alignSequential(
   expected: string[],
   spoken: string[],
-  window = 2,
 ): { mask: boolean[]; spokenIndex: number[] } {
-  const mask = new Array<boolean>(expected.length).fill(false);
-  // For each expected word, the index of the spoken word that matched it
-  // (-1 if none). Lets callers attach the spoken word's exact timing.
-  const spokenIndex = new Array<number>(expected.length).fill(-1);
-  let cursor = 0;
-  let si = 0;
-  for (const word of spoken) {
-    const thisSpoken = si++;
-    if (cursor >= expected.length) break;
-    let matchedAt = -1;
-    // Near window first (tolerates a 1–2 word skip), then a far scan to
-    // re-sync after a longer jump.
-    for (let k = 0; k <= window && cursor + k < expected.length; k++) {
-      if (wordsMatch(expected[cursor + k], word)) {
-        matchedAt = cursor + k;
-        break;
-      }
+  const n = expected.length;
+  const m = spoken.length;
+
+  // Scoring: reward a (fuzzy) match, penalize mismatch and gaps.
+  const MATCH = 2;
+  const MISMATCH = -1;
+  const GAP = -1;
+
+  // dp[i][j] = best alignment score of expected[0..i) vs spoken[0..j).
+  const dp: number[][] = Array.from({ length: n + 1 }, () =>
+    new Array<number>(m + 1).fill(0),
+  );
+  for (let i = 1; i <= n; i++) dp[i][0] = i * GAP;
+  for (let j = 1; j <= m; j++) dp[0][j] = j * GAP;
+
+  for (let i = 1; i <= n; i++) {
+    for (let j = 1; j <= m; j++) {
+      const diagScore =
+        dp[i - 1][j - 1] +
+        (wordsMatch(expected[i - 1], spoken[j - 1]) ? MATCH : MISMATCH);
+      const up = dp[i - 1][j] + GAP; // expected word unmatched (skipped)
+      const left = dp[i][j - 1] + GAP; // spoken word unmatched (extra/noise)
+      dp[i][j] = Math.max(diagScore, up, left);
     }
-    if (matchedAt < 0) {
-      for (let j = cursor + window + 1; j < expected.length; j++) {
-        if (wordsMatch(expected[j], word)) {
-          matchedAt = j;
-          break;
-        }
-      }
-    }
-    if (matchedAt >= 0) {
-      // Only the actually-spoken word is correct. Words the reader skipped over
-      // (between cursor and matchedAt) stay false — they were not read.
-      mask[matchedAt] = true;
-      spokenIndex[matchedAt] = thisSpoken;
-      cursor = matchedAt + 1;
-    }
-    // No match anywhere ahead: extra/noise word, keep cursor.
   }
+
+  // Backtrack to recover the alignment.
+  const mask = new Array<boolean>(n).fill(false);
+  const spokenIndex = new Array<number>(n).fill(-1);
+  let i = n;
+  let j = m;
+  while (i > 0 && j > 0) {
+    const isMatch = wordsMatch(expected[i - 1], spoken[j - 1]);
+    const diagScore = dp[i - 1][j - 1] + (isMatch ? MATCH : MISMATCH);
+    if (dp[i][j] === diagScore) {
+      // Expected word i-1 aligns with spoken word j-1.
+      if (isMatch) {
+        mask[i - 1] = true;
+        spokenIndex[i - 1] = j - 1;
+      }
+      i--;
+      j--;
+    } else if (dp[i][j] === dp[i - 1][j] + GAP) {
+      // Expected word i-1 was skipped (not read).
+      i--;
+    } else {
+      // Spoken word j-1 was extra/noise.
+      j--;
+    }
+  }
+
   return { mask, spokenIndex };
 }
 
