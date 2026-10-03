@@ -46,7 +46,7 @@ function ActivitiesList() {
             <button
               key={a.id}
               type="button"
-              onClick={() => navigate(`/teacher/learners/${a.learnerId}`)}
+              onClick={() => navigate(`/teacher/activities/${a.id}/review`)}
               className="flex items-center gap-4 p-4 rounded-xl bg-surface-container-lowest shadow-sm text-left hover:bg-surface-container-low transition-colors"
             >
               <span className="flex flex-col min-w-0">
