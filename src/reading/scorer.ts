@@ -52,6 +52,37 @@ export function expandToken(displayToken: string): string[] {
     .filter(Boolean);
 }
 
+/**
+ * Normalizes a display token to a single JOINED form (letters/numbers only).
+ * A hyphenated repeated word collapses to one unit, e.g.
+ *   "araw-araw" -> "arawaraw",  "paru-paro," -> "paruparo".
+ * This is how recognizers typically emit repeated words (one joined token).
+ */
+export function joinedNormal(displayToken: string): string {
+  return expandToken(displayToken).join('') || normalizeWord(displayToken);
+}
+
+/**
+ * Pre-merges adjacent spoken tokens whose concatenation exactly equals an
+ * expected joined word. Handles the case where the recognizer split a repeated
+ * word into two tokens ("paru paro") when the passage has it as one word
+ * ("paru-paro" -> expected "paruparo"). Only merges when the joined pair is in
+ * the expected set, so normal word pairs are left untouched.
+ */
+function mergeSplitRepeats(spoken: string[], expectedSet: Set<string>): string[] {
+  const out: string[] = [];
+  for (let i = 0; i < spoken.length; i++) {
+    const pair = i + 1 < spoken.length ? spoken[i] + spoken[i + 1] : '';
+    if (pair && expectedSet.has(pair)) {
+      out.push(pair);
+      i++; // consume the next token too
+    } else {
+      out.push(spoken[i]);
+    }
+  }
+  return out;
+}
+
 /** Levenshtein edit distance between two short strings. */
 function editDistance(a: string, b: string): number {
   const m = a.length;
@@ -173,55 +204,27 @@ export interface ReadingScore {
 export function scoreReading(passage: string, transcript: string): ReadingScore {
   const expectedDisplay = tokenize(passage);
 
-  // Flatten passage into sub-words (so hyphenated words become multiple units),
-  // remembering which display word each sub-word belongs to.
-  const expectedNorm: string[] = [];
-  const ownerOfSub: number[] = [];
-  expectedDisplay.forEach((token, index) => {
-    const parts = expandToken(token);
-    // A token with no letters (e.g. a stray "—") still occupies one slot.
-    if (parts.length === 0) {
-      expectedNorm.push(normalizeWord(token));
-      ownerOfSub.push(index);
-      return;
-    }
-    for (const part of parts) {
-      expectedNorm.push(part);
-      ownerOfSub.push(index);
-    }
-  });
+  // Each passage word becomes ONE normalized unit using its JOINED form, so a
+  // repeated word ("araw-araw", "paru-paro") is treated as a single word
+  // "arawaraw" / "paruparo". This matters because speech recognizers usually
+  // return a repeated word as one joined token, not two.
+  const expectedNorm = expectedDisplay.map((t) => joinedNormal(t));
 
-  const spokenNorm = tokenize(transcript).map(normalizeWord).filter(Boolean);
+  // The spoken side may contain the repeated word EITHER joined ("paruparo")
+  // or split into two tokens ("paru paro"). Pre-merge adjacent spoken tokens
+  // whose concatenation equals an expected joined word, so both forms align.
+  const spokenNorm = mergeSplitRepeats(
+    tokenize(transcript).map(normalizeWord).filter(Boolean),
+    new Set(expectedNorm),
+  )
 
-  // Greedy, in-order alignment — the SAME strategy as the live highlighting
-  // (readingProgress), so a word shown correct while reading stays correct in
-  // the final result. LCS global optimization could flip some of those, which
-  // is what made live and final disagree.
-  const { mask: subMask, spokenIndex: subSpokenIndex } = alignSequential(
-    expectedNorm,
-    spokenNorm,
-  );
-
-  // A display word is correct only when ALL of its sub-words matched. Its
-  // spoken index is the FIRST matched sub-word's spoken index (used to attach
-  // the exact recognizer timing for click-to-seek).
-  const allMatched = new Array<boolean>(expectedDisplay.length).fill(true);
-  const anySubs = new Array<boolean>(expectedDisplay.length).fill(false);
-  const firstSpoken = new Array<number>(expectedDisplay.length).fill(-1);
-  subMask.forEach((matched, k) => {
-    const owner = ownerOfSub[k];
-    anySubs[owner] = true;
-    if (!matched) allMatched[owner] = false;
-    if (matched && firstSpoken[owner] === -1) {
-      firstSpoken[owner] = subSpokenIndex[k];
-    }
-  });
+  const { mask, spokenIndex } = alignSequential(expectedNorm, spokenNorm)
 
   const words: WordResult[] = expectedDisplay.map((word, index) => ({
     index,
     expected: word,
-    correct: anySubs[index] ? allMatched[index] : false,
-    spokenIndex: firstSpoken[index],
+    correct: mask[index] === true,
+    spokenIndex: spokenIndex[index],
   }));
 
   const totalWords = expectedDisplay.length;
@@ -261,26 +264,22 @@ export function readingProgress(
 ): ReadingProgress {
   const displayTokens = tokenize(passage);
 
-  // Expand to sub-words (hyphenated words -> multiple units), tracking owners.
-  const expected: string[] = [];
-  const ownerOfSub: number[] = [];
-  displayTokens.forEach((token, index) => {
-    const parts = expandToken(token);
-    const units = parts.length > 0 ? parts : [normalizeWord(token)];
-    for (const part of units) {
-      expected.push(part);
-      ownerOfSub.push(index);
-    }
-  });
+  // One joined unit per display word, so repeated words ("araw-araw") are a
+  // single unit — consistent with scoreReading.
+  const expected = displayTokens.map((t) => joinedNormal(t));
 
-  const spoken = tokenize(transcript).map(normalizeWord).filter(Boolean);
-  const subRead = new Array<boolean>(expected.length).fill(false);
+  // Merge spoken tokens that reconstruct a joined repeated word ("paru paro").
+  const spoken = mergeSplitRepeats(
+    tokenize(transcript).map(normalizeWord).filter(Boolean),
+    new Set(expected),
+  );
 
-  let cursor = 0; // cursor over sub-words
+  const read = new Array<boolean>(displayTokens.length).fill(false);
+  let cursor = 0;
   for (const word of spoken) {
     if (cursor >= expected.length) break;
-    // Look for this spoken word at the cursor or up to `window` sub-words ahead,
-    // so one skipped/misrecognized word can be stepped over to re-align.
+    // Match at the cursor or up to `window` words ahead to tolerate a small
+    // skip; mark the words passed as read and advance the cursor.
     let matchedAt = -1;
     for (let k = 0; k <= window && cursor + k < expected.length; k++) {
       if (wordsMatch(expected[cursor + k], word)) {
@@ -289,26 +288,12 @@ export function readingProgress(
       }
     }
     if (matchedAt >= 0) {
-      // Mark everything from the cursor through the matched sub-word as read.
-      for (let i = cursor; i <= matchedAt; i++) subRead[i] = true;
+      for (let i = cursor; i <= matchedAt; i++) read[i] = true;
       cursor = matchedAt + 1;
     }
-    // If no match within the window, treat it as noise/extra speech and keep
-    // the cursor where it is (don't advance on words that aren't in the text).
+    // No match within the window: treat as noise, keep the cursor.
   }
 
-  // Collapse sub-word progress back to display words: a word is "read" only
-  // when every sub-word is read; the display cursor is the first unread word.
-  const read = new Array<boolean>(displayTokens.length).fill(true);
-  const seen = new Array<boolean>(displayTokens.length).fill(false);
-  subRead.forEach((wasRead, k) => {
-    const owner = ownerOfSub[k];
-    seen[owner] = true;
-    if (!wasRead) read[owner] = false;
-  });
-  for (let i = 0; i < read.length; i++) {
-    if (!seen[i]) read[i] = false;
-  }
   let displayCursor = read.findIndex((r) => !r);
   if (displayCursor === -1) displayCursor = displayTokens.length;
 
