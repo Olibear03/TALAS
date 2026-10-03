@@ -660,7 +660,7 @@ export default function OralAssessment({
             >
               Ulitin
             </button>
-            {/* IHINTO */}
+            {/* Ihinto */}
             <button
               type="button"
               disabled={!isRecording}
@@ -678,7 +678,7 @@ export default function OralAssessment({
                 opacity: isRecording ? 1 : 0.4,
               }}
             >
-              IHINTO
+              Ihinto
             </button>
             {/* Ipasa */}
             <button
