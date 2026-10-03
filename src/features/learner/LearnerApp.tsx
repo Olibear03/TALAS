@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import LearnerAuth from '../auth/LearnerAuth'
 import LearnerDashboard from '../../screens/learner/LearnerDashboard'
 import OralAssessment from '../../screens/learner/OralAssessment'
 import OralCompletion from '../../screens/learner/OralCompletion'
@@ -15,6 +15,10 @@ import type {
   PracticeProfile,
   PracticeActivityDef,
 } from '../../data/practiceData'
+import {
+  setLearnerInactive,
+  type LearnerRecord,
+} from '../teacher/dashboard/sectionData'
 import type { OralResult } from '../../screens/learner/OralAssessment'
 
 /**
@@ -36,9 +40,10 @@ type Screen =
   | 'practice-completion'
 
 export default function LearnerApp() {
-  const navigate = useNavigate()
+  // The authenticated learner (null until a valid code is entered).
+  const [learner, setLearner] = useState<LearnerRecord | null>(null)
   const [currentScreen, setCurrentScreen] = useState<Screen>('dashboard')
-  const [learnerName] = useState<string>('Maria')
+  const learnerName = learner?.name ?? 'Mag-aaral'
   const [practiceProfile, setPracticeProfile] = useState<PracticeProfile>({
     currentLevel: 2,
     recentScores: [],
@@ -79,6 +84,18 @@ export default function LearnerApp() {
     setCurrentScreen('practice-activity')
   }
 
+  /** Sign the learner out: clear their active status and return to the gate. */
+  const handleExit = () => {
+    if (learner) setLearnerInactive(learner.id)
+    setLearner(null)
+    setCurrentScreen('dashboard')
+  }
+
+  // Code gate: no entry without a valid per-student code.
+  if (!learner) {
+    return <LearnerAuth onSuccess={setLearner} />
+  }
+
   switch (currentScreen) {
     case 'dashboard':
       return (
@@ -86,12 +103,13 @@ export default function LearnerApp() {
           learnerName={learnerName}
           onStartAssessment={() => setCurrentScreen('oral-assessment')}
           onStartPractice={handleStartPractice}
-          onGoToProfile={() => navigate('/')}
+          onGoToProfile={handleExit}
         />
       )
     case 'oral-assessment':
       return (
         <OralAssessment
+          learnerId={learner.id}
           onBack={() => setCurrentScreen('dashboard')}
           onSubmit={(result) => {
             setOralResult(result)
@@ -117,7 +135,7 @@ export default function LearnerApp() {
       return (
         <FormalAssessmentCompletion
           learnerName={learnerName}
-          onDone={() => setCurrentScreen('dashboard')}
+          onDone={handleExit}
         />
       )
     case 'practice-activity':

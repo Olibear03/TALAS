@@ -1,4 +1,5 @@
-﻿import { learnersForSection } from './sectionData'
+﻿import { learnersForSection, isLearnerActive } from './sectionData'
+import { useSubmissions } from './useSubmissions'
 
 /** Aggregate counts shown in the dashboard quick-stats row. */
 export interface DashboardStats {
@@ -10,19 +11,30 @@ export interface DashboardStats {
 }
 
 /**
- * Derives dashboard stats from the mock learner data for the given section
- * (`all` = every learner). Swap `learnersForSection` for a real data fetch
- * later without touching the consuming components.
+ * Derives dashboard stats from REAL submitted reading attempts (not the static
+ * roster). A learner counts as "assessed" once they have at least one attempt;
+ * "need support" if their best accuracy is below 60%; "needs review" is the
+ * total number of submissions in scope; "active today" reflects live sessions.
  */
 export function useDashboardStats(sectionId: string = 'all'): DashboardStats {
   const learners = learnersForSection(sectionId)
+  const { byLearner } = useSubmissions()
 
-  const assessedCount = learners.filter((l) => l.level !== null).length
-  const needSupportCount = learners.filter(
-    (l) => l.level === 'MR' || l.level === 'FR',
-  ).length
-  const activeTodayCount = learners.filter((l) => l.activeToday).length
-  const needsReviewCount = learners.filter((l) => l.needsReview).length
+  let assessedCount = 0
+  let needSupportCount = 0
+  let needsReviewCount = 0
+  let activeTodayCount = 0
+
+  for (const l of learners) {
+    const attempts = byLearner[l.id] ?? []
+    if (attempts.length > 0) {
+      assessedCount++
+      needsReviewCount += attempts.length
+      const bestAccuracy = Math.max(...attempts.map((a) => a.accuracy))
+      if (bestAccuracy < 60) needSupportCount++
+    }
+    if (isLearnerActive(l.id)) activeTodayCount++
+  }
 
   return {
     totalLearners: learners.length,

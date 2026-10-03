@@ -7,20 +7,7 @@ interface Recommendation {
   detail: string
 }
 
-const PENDING: Recommendation[] = [
-  {
-    id: 'R-01',
-    learnerId: 'AS-2041',
-    learner: 'Amina Santos',
-    detail: 'Promote to Marungko Set B (/i/, /o/, /b/) after 3 consecutive mastery sessions.',
-  },
-  {
-    id: 'R-02',
-    learnerId: 'GR-3012',
-    learner: 'Gabriel Reyes',
-    detail: 'Add literal-recall comprehension drills; decoding is strong but recall lagging.',
-  },
-]
+const PENDING: Recommendation[] = []
 
 /** System-generated recommendations awaiting a teacher decision. */
 function PendingRecommendations() {
@@ -35,37 +22,43 @@ function PendingRecommendations() {
         </p>
       </header>
 
-      <div className="flex flex-col gap-3">
-        {PENDING.map((r) => (
-          <article
-            key={r.id}
-            className="p-5 rounded-xl bg-surface-container-lowest shadow-sm flex flex-col gap-3"
-          >
-            <button
-              type="button"
-              onClick={() => navigate(`/teacher/learners/${r.learnerId}/recommendations`)}
-              className="font-bold text-left hover:text-primary transition-colors w-fit"
+      {PENDING.length === 0 ? (
+        <div className="p-8 rounded-xl bg-surface-container-lowest shadow-sm text-center">
+          <p className="text-on-surface-variant">No pending recommendations.</p>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-3">
+          {PENDING.map((r) => (
+            <article
+              key={r.id}
+              className="p-5 rounded-xl bg-surface-container-lowest shadow-sm flex flex-col gap-3"
             >
-              {r.learner}
-            </button>
-            <p className="text-on-surface-variant">{r.detail}</p>
-            <div className="flex items-center gap-2">
               <button
                 type="button"
-                className="h-9 px-4 rounded-lg bg-primary-container hover:bg-primary text-on-primary text-sm font-semibold transition-colors"
+                onClick={() => navigate(`/teacher/learners/${r.learnerId}/recommendations`)}
+                className="font-bold text-left hover:text-primary transition-colors w-fit"
               >
-                Approve
+                {r.learner}
               </button>
-              <button
-                type="button"
-                className="h-9 px-4 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface text-sm font-semibold transition-colors"
-              >
-                Dismiss
-              </button>
-            </div>
-          </article>
-        ))}
-      </div>
+              <p className="text-on-surface-variant">{r.detail}</p>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  className="h-9 px-4 rounded-lg bg-primary-container hover:bg-primary text-on-primary text-sm font-semibold transition-colors"
+                >
+                  Approve
+                </button>
+                <button
+                  type="button"
+                  className="h-9 px-4 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface text-sm font-semibold transition-colors"
+                >
+                  Dismiss
+                </button>
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

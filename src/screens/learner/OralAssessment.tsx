@@ -31,10 +31,12 @@ export interface OralResult {
 interface Props {
   onBack: () => void
   onSubmit: (result: OralResult) => void
+  /** The logged-in learner's id; the saved attempt is attributed to them. */
+  learnerId?: string
 }
 
 const PASSAGE_ID = 'passage-oral-maya'
-const LEARNER_ID = 'learner-maria' // demo learner; a real session supplies this
+const DEFAULT_LEARNER_ID = 'learner-maria' // fallback when no session supplied
 
 const ORAL_PASSAGE =
   "Masaya si Maya sa bukid. Nakakita siya ng mga paru-paro sa paligid ng mga bulaklak. Tumakbo siya patungo sa kanyang nanay at sinabi, 'Nanay, maganda ang mga paru-paro!' Ngumiti ang kanyang nanay at sinabing, 'Oo, mahal. Ingatan natin sila.'"
@@ -53,7 +55,11 @@ function estimateTime(i: number, total: number, dur: number): number | undefined
   return (i / total) * dur
 }
 
-export default function OralAssessment({ onBack, onSubmit }: Props) {
+export default function OralAssessment({
+  onBack,
+  onSubmit,
+  learnerId = DEFAULT_LEARNER_ID,
+}: Props) {
   const speech = useSpeechRecognition('fil-PH')
   const [elapsedSeconds, setElapsedSeconds] = useState<number>(0)
   const finishingRef = useRef(false)
@@ -114,7 +120,7 @@ export default function OralAssessment({ onBack, onSubmit }: Props) {
       const blob = speech.getAudioBlob()
       if (blob && navigator.onLine && isRecordingStorageConfigured()) {
         try {
-          audioKey = await uploadRecording(blob, LEARNER_ID, attemptId)
+          audioKey = await uploadRecording(blob, learnerId, attemptId)
         } catch {
           /* upload failed; attempt still saves without the recording key */
         }
@@ -124,7 +130,7 @@ export default function OralAssessment({ onBack, onSubmit }: Props) {
         await save('readingAttempts', {
           id: attemptId,
           passageId: PASSAGE_ID,
-          learnerId: LEARNER_ID,
+          learnerId,
           transcript: result.transcript,
           accuracy: result.accuracy,
           correctWords: result.correctWords,
@@ -136,14 +142,16 @@ export default function OralAssessment({ onBack, onSubmit }: Props) {
           audioKey,
           createdAt: new Date().toISOString(),
         })
+        console.info('[TALAS] Saved reading attempt', attemptId, 'for', learnerId)
         // Push to the cloud database right away. Fire-and-forget: if offline,
         // the record stays dirty in IndexedDB and auto-syncs on reconnect.
         void syncNow()
-      } catch {
-        /* persistence is best-effort; the result still flows to the UI */
+      } catch (err) {
+        // Surface the real cause instead of silently losing the attempt.
+        console.error('[TALAS] Failed to save reading attempt:', err)
       }
     },
-    [speech],
+    [speech, learnerId],
   )
 
   const finishReading = useCallback(async () => {

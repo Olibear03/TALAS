@@ -8,11 +8,7 @@ interface AssessmentRow {
   status: 'Assigned' | 'Submitted' | 'Reviewed'
 }
 
-const ASSESSMENTS: AssessmentRow[] = [
-  { id: 'A-5501', learnerId: 'JD-1083', learner: 'Juan Dela Cruz', type: 'Oral Fluency', status: 'Submitted' },
-  { id: 'A-5502', learnerId: 'AS-2041', learner: 'Amina Santos', type: 'Letter-Sound', status: 'Assigned' },
-  { id: 'A-5503', learnerId: 'GR-3012', learner: 'Gabriel Reyes', type: 'Comprehension', status: 'Reviewed' },
-]
+const ASSESSMENTS: AssessmentRow[] = []
 
 const STATUS_TONE: Record<AssessmentRow['status'], string> = {
   Assigned: 'bg-surface-container-high text-on-surface',
@@ -42,24 +38,30 @@ function AssessmentsList() {
         </button>
       </header>
 
-      <div className="flex flex-col gap-2">
-        {ASSESSMENTS.map((a) => (
-          <div
-            key={a.id}
-            className="flex items-center gap-4 p-4 rounded-xl bg-surface-container-lowest shadow-sm"
-          >
-            <span className="flex flex-col min-w-0">
-              <span className="font-bold truncate">{a.learner}</span>
-              <span className="text-sm text-on-surface-variant">
-                {a.type} • {a.id}
+      {ASSESSMENTS.length === 0 ? (
+        <div className="p-8 rounded-xl bg-surface-container-lowest shadow-sm text-center">
+          <p className="text-on-surface-variant">No assessments assigned yet.</p>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-2">
+          {ASSESSMENTS.map((a) => (
+            <div
+              key={a.id}
+              className="flex items-center gap-4 p-4 rounded-xl bg-surface-container-lowest shadow-sm"
+            >
+              <span className="flex flex-col min-w-0">
+                <span className="font-bold truncate">{a.learner}</span>
+                <span className="text-sm text-on-surface-variant">
+                  {a.type} • {a.id}
+                </span>
               </span>
-            </span>
-            <span className={`ml-auto px-2.5 py-1 rounded-full text-sm font-bold ${STATUS_TONE[a.status]}`}>
-              {a.status}
-            </span>
-          </div>
-        ))}
-      </div>
+              <span className={`ml-auto px-2.5 py-1 rounded-full text-sm font-bold ${STATUS_TONE[a.status]}`}>
+                {a.status}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

@@ -3,8 +3,6 @@ import {
   Leaf,
   LayoutDashboard,
   Users,
-  ClipboardList,
-  BookOpen,
   FileBarChart,
   type LucideIcon,
 } from 'lucide-react'
@@ -19,8 +17,6 @@ interface NavItem {
 const TEACHER_NAV: NavItem[] = [
   { to: '/teacher', label: 'Dashboard', icon: LayoutDashboard, end: true },
   { to: '/teacher/learners', label: 'Learners', icon: Users },
-  { to: '/teacher/assessments', label: 'Assessments', icon: ClipboardList },
-  { to: '/teacher/activities', label: 'Activities', icon: BookOpen },
   { to: '/teacher/reports', label: 'Reports', icon: FileBarChart },
 ]
 

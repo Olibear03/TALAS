@@ -4,6 +4,7 @@ import {
   learnerProfile,
   type RecentActivityItem,
 } from '../dashboard/sectionData'
+import ReadingAttempts from './ReadingAttempts'
 
 const ACTIVITY_META: Record<
   RecentActivityItem['type'],
@@ -24,6 +25,9 @@ function Overview() {
 
   return (
     <div className="space-y-6">
+      {/* Live submitted oral reading attempts (synced from the learner). */}
+      <ReadingAttempts learnerId={learnerId} />
+
       {/* ------------------------------------------------------------ */}
       {/* 1. FORMAL ASSESSMENT SNAPSHOT — official, finalized, locked   */}
       {/* ------------------------------------------------------------ */}

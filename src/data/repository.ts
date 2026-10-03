@@ -101,7 +101,15 @@ export async function listAssignmentsByLearner(
 export async function listReadingAttemptsByLearner(
   learnerId: string,
 ): Promise<StoreEntityMap["readingAttempts"][]> {
-  const all = await getReadingAttemptsByLearner(learnerId);
+  // Prefer the by_learner index, but fall back to a full scan if the index is
+  // missing (e.g. a DB created before the index existed) so reads never fail.
+  let all: StoreEntityMap["readingAttempts"][];
+  try {
+    all = await getReadingAttemptsByLearner(learnerId);
+  } catch {
+    const everything = await getAll("readingAttempts");
+    all = everything.filter((a) => a.learnerId === learnerId);
+  }
   return all
     .filter(isLive)
     .sort((a, b) => (b.createdAt < a.createdAt ? -1 : 1));

@@ -1,4 +1,5 @@
 ﻿import { learnersForSection } from './sectionData'
+import { useSubmissions } from './useSubmissions'
 
 interface CrlaBand {
   key: 'GR' | 'LR' | 'MR' | 'FR'
@@ -13,6 +14,14 @@ const BANDS: CrlaBand[] = [
   { key: 'FR', label: 'Full Refresher', color: 'bg-crla-fr' },
 ]
 
+/** Maps a best-accuracy % to a CRLA band for the distribution chart. */
+function bandForAccuracy(pct: number): CrlaBand['key'] {
+  if (pct >= 80) return 'GR'
+  if (pct >= 60) return 'LR'
+  if (pct >= 40) return 'MR'
+  return 'FR'
+}
+
 interface ClassDistributionProps {
   sectionId?: string
 }
@@ -20,11 +29,18 @@ interface ClassDistributionProps {
 /** CRLA reading-level distribution across assessed learners in a section. */
 function ClassDistribution({ sectionId = 'all' }: ClassDistributionProps) {
   const learners = learnersForSection(sectionId)
+  const { byLearner } = useSubmissions()
 
-  const counts = BANDS.map((b) => ({
-    ...b,
-    count: learners.filter((l) => l.level === b.key).length,
-  }))
+  // Each assessed learner contributes to one band based on their best accuracy.
+  const counts = BANDS.map((b) => ({ ...b, count: 0 }))
+  for (const l of learners) {
+    const attempts = byLearner[l.id] ?? []
+    if (attempts.length === 0) continue
+    const best = Math.max(...attempts.map((a) => a.accuracy))
+    const key = bandForAccuracy(best)
+    const bucket = counts.find((c) => c.key === key)
+    if (bucket) bucket.count++
+  }
   const totalAssessed = counts.reduce((sum, b) => sum + b.count, 0)
 
   return (

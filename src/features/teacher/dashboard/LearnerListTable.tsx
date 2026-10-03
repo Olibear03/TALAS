@@ -1,5 +1,6 @@
 ﻿import { useNavigate } from 'react-router-dom'
-import { learnersForSection, type CrlaLevel } from './sectionData'
+import { learnersForSection, isLearnerActive, type CrlaLevel } from './sectionData'
+import { useSubmissions } from './useSubmissions'
 
 interface LearnerListTableProps {
   sectionId?: string
@@ -31,6 +32,7 @@ function LevelBadge({ level }: { level: CrlaLevel }) {
 function LearnerListTable({ sectionId = 'all' }: LearnerListTableProps) {
   const navigate = useNavigate()
   const learners = learnersForSection(sectionId)
+  const { byLearner } = useSubmissions()
 
   return (
     <section className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
@@ -57,13 +59,14 @@ function LearnerListTable({ sectionId = 'all' }: LearnerListTableProps) {
               <th className="px-6 py-3 font-sans text-xs font-semibold text-gray-500 uppercase tracking-wide">Learner</th>
               <th className="px-6 py-3 font-sans text-xs font-semibold text-gray-500 uppercase tracking-wide">Grade</th>
               <th className="px-6 py-3 font-sans text-xs font-semibold text-gray-500 uppercase tracking-wide">Reading Level</th>
+              <th className="px-6 py-3 font-sans text-xs font-semibold text-gray-500 uppercase tracking-wide">Submissions</th>
               <th className="px-6 py-3 font-sans text-xs font-semibold text-gray-500 uppercase tracking-wide">Last Active</th>
             </tr>
           </thead>
           <tbody>
             {learners.length === 0 ? (
               <tr>
-                <td colSpan={4} className="px-6 py-8 text-center font-sans text-sm text-gray-400">
+                <td colSpan={5} className="px-6 py-8 text-center font-sans text-sm text-gray-400">
                   No learners in this section.
                 </td>
               </tr>
@@ -84,7 +87,25 @@ function LearnerListTable({ sectionId = 'all' }: LearnerListTableProps) {
                   </td>
                   <td className="px-6 py-3 font-sans text-sm text-gray-600">{l.grade}</td>
                   <td className="px-6 py-3"><LevelBadge level={l.level} /></td>
-                  <td className="px-6 py-3 font-sans text-sm text-gray-400">{l.lastActive}</td>
+                  <td className="px-6 py-3">
+                    {byLearner[l.id]?.length ? (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-coral-50 text-coral-500 font-sans text-xs font-bold">
+                        {byLearner[l.id].length} to review
+                      </span>
+                    ) : (
+                      <span className="font-sans text-sm text-gray-400">—</span>
+                    )}
+                  </td>
+                  <td className="px-6 py-3">
+                    {isLearnerActive(l.id) ? (
+                      <span className="inline-flex items-center gap-1.5 font-sans text-sm font-semibold text-sprout-500">
+                        <span className="w-2 h-2 rounded-full bg-sprout-500 animate-pulse" />
+                        Now
+                      </span>
+                    ) : (
+                      <span className="font-sans text-sm text-gray-400">{l.lastActive}</span>
+                    )}
+                  </td>
                 </tr>
               ))
             )}

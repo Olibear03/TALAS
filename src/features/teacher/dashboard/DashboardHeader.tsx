@@ -14,10 +14,6 @@ function DashboardHeader() {
 
   return (
     <header className="space-y-2">
-      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sprout-50 text-sprout-500 font-sans text-xs font-semibold tracking-wide">
-        <span className="w-1.5 h-1.5 rounded-full bg-sprout-500 animate-pulse" />
-        <span>SY 2026–2027 • Ikalawang Markahan</span>
-      </div>
       <h1 className="font-display text-2xl sm:text-3xl font-bold text-charcoal tracking-tight">
         {greeting}, Teacher Maria{' '}
         <span className="inline-block hover:rotate-12 transition-transform cursor-default">
@@ -25,8 +21,7 @@ function DashboardHeader() {
         </span>
       </h1>
       <p className="font-reading text-sm text-gray-500 max-w-2xl">
-        {dateLabel} · Track and support Grade 1–3 early literacy progress across
-        Phil-IRI and Marungko approaches with diagnostic confidence.
+        {dateLabel}
       </p>
     </header>
   )
