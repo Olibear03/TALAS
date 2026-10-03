@@ -75,8 +75,13 @@ export function crlaLabel(level: CrlaLevel): string {
   return level ? CRLA_LABEL[level] : 'Not yet assessed'
 }
 
+export type FormalAssessmentType = 'Oral' | 'Silent'
+
 export interface FormalAssessmentRecord {
+  id: string
   period: string
+  /** Oral (read-aloud miscue/fluency) vs Silent (reading comprehension). */
+  type: FormalAssessmentType
   classification: string
   readerStage: string
   dateFinalized: string
@@ -84,11 +89,20 @@ export interface FormalAssessmentRecord {
   miscues: string
   comprehension: string
   phonemesFlagged: string[]
+  /** Finalized formal records are read-only. */
+  status: 'Finalized'
 }
 
+export type InterventionStatus = 'Active' | 'Completed' | 'Discontinued'
+
 export interface InterventionRecord {
+  id: string
   title: string
   tier: string
+  /** Reading skill / need this plan targets. */
+  targetSkill: string
+  status: InterventionStatus
+  dateAssigned: string
   directive: string
   description: string
   modulesCompleted: number
@@ -96,11 +110,29 @@ export interface InterventionRecord {
   nextSession: string
 }
 
+export type PracticeTrend = 'Improving' | 'Steady' | 'Needs attention'
+
+export interface PracticeActivityEntry {
+  date: string
+  activity: string
+  accuracyPct: number
+  detail: string
+}
+
 export interface PracticeRecord {
   level: string
   domain: string
+  trend: PracticeTrend
   recentAccuracy: { label: string; pct: number }[]
+  history: PracticeActivityEntry[]
   note: string
+}
+
+export interface RecentActivityItem {
+  date: string
+  type: 'Formal Assessment' | 'Practice' | 'Intervention'
+  label: string
+  detail: string
 }
 
 export interface LearnerProfile {
@@ -113,9 +145,12 @@ export interface LearnerProfile {
   classCode: string
   status: string
   formal: FormalAssessmentRecord | null
+  formalHistory: FormalAssessmentRecord[]
   practice: PracticeRecord | null
   intervention: InterventionRecord | null
+  interventionHistory: InterventionRecord[]
   pedagogicalNote: string
+  recentActivity: RecentActivityItem[]
 }
 
 /** Per-learner profile detail keyed by learner id. */
@@ -130,7 +165,9 @@ const PROFILE_DETAIL: Record<
     pin: '2041',
     classCode: 'TALAS-G1',
     formal: {
+      id: 'FA-AS-02',
       period: 'Q1 BoSY',
+      type: 'Oral',
       classification: 'Full Refresher (Letter Sounds)',
       readerStage: 'Emergent Reader',
       dateFinalized: 'October 12, 2026',
@@ -138,20 +175,60 @@ const PROFILE_DETAIL: Record<
       miscues: '8 miscues (oral)',
       comprehension: '2 / 5 literal comprehension',
       phonemesFlagged: ['/m/', '/s/', '/a/'],
+      status: 'Finalized',
     },
+    formalHistory: [
+      {
+        id: 'FA-AS-02',
+        period: 'Q1 BoSY',
+        type: 'Oral',
+        classification: 'Full Refresher (Letter Sounds)',
+        readerStage: 'Emergent Reader',
+        dateFinalized: 'October 12, 2026',
+        assessor: 'T. Reyes (Certified Evaluator)',
+        miscues: '8 miscues (oral)',
+        comprehension: '2 / 5 literal comprehension',
+        phonemesFlagged: ['/m/', '/s/', '/a/'],
+        status: 'Finalized',
+      },
+      {
+        id: 'FA-AS-01',
+        period: 'Kindergarten EoSY',
+        type: 'Silent',
+        classification: 'Full Refresher (Letter Sounds)',
+        readerStage: 'Pre-Emergent Reader',
+        dateFinalized: 'March 20, 2026',
+        assessor: 'T. Maria (Certified Evaluator)',
+        miscues: 'n/a (silent)',
+        comprehension: '1 / 5 literal comprehension',
+        phonemesFlagged: ['/m/', '/s/', '/a/', '/i/'],
+        status: 'Finalized',
+      },
+    ],
     practice: {
       level: 'Level 2 — Marungko Set A (/m/, /s/, /a/)',
       domain: 'Filipino Reading',
+      trend: 'Improving',
       recentAccuracy: [
         { label: 'Mon, Oct 19', pct: 85 },
         { label: 'Wed, Oct 21', pct: 90 },
         { label: 'Fri, Oct 23', pct: 80 },
       ],
+      history: [
+        { date: 'Oct 23, 2026', activity: 'Marungko Set A drill', accuracyPct: 80, detail: '12 of 15 words correct' },
+        { date: 'Oct 21, 2026', activity: 'Marungko Set A drill', accuracyPct: 90, detail: 'Personal best this week' },
+        { date: 'Oct 19, 2026', activity: 'Marungko Set A drill', accuracyPct: 85, detail: '13 of 15 words correct' },
+        { date: 'Oct 16, 2026', activity: 'Letter-sound warm-up', accuracyPct: 70, detail: '/m/, /s/ focus set' },
+      ],
       note: 'Mastery threshold achieved across 3 consecutive sessions (avg 85%). System recommends promoting to Marungko Set B (/i/, /o/, /b/).',
     },
     intervention: {
+      id: 'IV-AS-02',
       title: 'Targeted Phonemic Blending',
       tier: 'Active Tier 2',
+      targetSkill: 'Initial phoneme identification (/m/, /s/, /a/)',
+      status: 'Active',
+      dateAssigned: 'October 14, 2026',
       directive: 'Week 3 of 4',
       description:
         'Multi-sensory tactile sandpaper cards & sound wheel drill for rapid initial phoneme identification.',
@@ -159,8 +236,30 @@ const PROFILE_DETAIL: Record<
       modulesTotal: 5,
       nextSession: 'Thursday, 10:00 AM (15 mins)',
     },
+    interventionHistory: [
+      {
+        id: 'IV-AS-01',
+        title: 'Letter-Sound Readiness',
+        tier: 'Tier 1',
+        targetSkill: 'Letter-sound correspondence (vowels)',
+        status: 'Completed',
+        dateAssigned: 'September 2, 2026',
+        directive: '4 of 4 weeks',
+        description:
+          'Picture-sound matching and vowel song routines to build baseline letter-sound awareness.',
+        modulesCompleted: 4,
+        modulesTotal: 4,
+        nextSession: '—',
+      },
+    ],
     pedagogicalNote:
       'Amina exhibits high auditory recall when songs and hand gestures accompany the sound of /m/. Maintain kinesthetic reinforcement before shifting to non-pictorial text flashcards.',
+    recentActivity: [
+      { date: 'Oct 23, 2026', type: 'Practice', label: 'Marungko Set A drill', detail: '80% accuracy · 12 of 15 words' },
+      { date: 'Oct 22, 2026', type: 'Intervention', label: 'Phonemic blending pull-out', detail: 'Module 3 of 5 completed' },
+      { date: 'Oct 21, 2026', type: 'Practice', label: 'Marungko Set A drill', detail: '90% accuracy · personal best' },
+      { date: 'Oct 12, 2026', type: 'Formal Assessment', label: 'CRLA BoSY finalized', detail: 'Full Refresher — Letter Sounds' },
+    ],
   },
 }
 
@@ -188,8 +287,11 @@ export function learnerProfile(id: string | undefined): LearnerProfile | null {
     classCode: detail?.classCode ?? `TALAS-${record.grade.replace(/\s/g, '')}`,
     status: record.level ? 'Active Learner' : 'Awaiting Assessment',
     formal: detail?.formal ?? null,
+    formalHistory: detail?.formalHistory ?? (detail?.formal ? [detail.formal] : []),
     practice: detail?.practice ?? null,
     intervention: detail?.intervention ?? null,
+    interventionHistory: detail?.interventionHistory ?? [],
     pedagogicalNote: detail?.pedagogicalNote ?? FALLBACK_NOTE,
+    recentActivity: detail?.recentActivity ?? [],
   }
 }

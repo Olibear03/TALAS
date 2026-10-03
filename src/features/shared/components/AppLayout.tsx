@@ -8,12 +8,12 @@ interface NavItem {
 }
 
 const TEACHER_NAV: NavItem[] = [
-  { to: '/teacher', label: 'Dashboard', icon: '🏠', end: true },
-  { to: '/teacher/learners', label: 'Learners', icon: '👥' },
-  { to: '/teacher/assessments', label: 'Assessments', icon: '📊' },
-  { to: '/teacher/recommendations', label: 'Recommendations', icon: '💡' },
-  { to: '/teacher/activities', label: 'Activities', icon: '⚡' },
-  { to: '/teacher/reports', label: 'Reports', icon: '📈' },
+  { to: '/teacher', label: 'Dashboard', icon: '', end: true },
+  { to: '/teacher/learners', label: 'Learners', icon: '' },
+  { to: '/teacher/assessments', label: 'Assessments', icon: '' },
+  { to: '/teacher/recommendations', label: 'Recommendations', icon: '' },
+  { to: '/teacher/activities', label: 'Activities', icon: '' },
+  { to: '/teacher/reports', label: 'Reports', icon: '' },
 ]
 
 /**
