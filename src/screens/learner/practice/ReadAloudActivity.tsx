@@ -231,27 +231,7 @@ export default function ReadAloudActivity({ onComplete, onBack }: Props) {
           })}
         </div>
 
-        {/* Play all button */}
-        <button
-          type="button"
-          onClick={handleSpeakAll}
-          disabled={speaking}
-          style={{
-            width: '100%',
-            minHeight: '52px',
-            background: 'transparent',
-            border: '2px solid var(--talas-blue)',
-            color: 'var(--talas-blue)',
-            borderRadius: '16px',
-            fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
-            fontSize: '15px',
-            fontWeight: 600,
-            cursor: speaking ? 'not-allowed' : 'pointer',
-            opacity: speaking ? 0.5 : 1,
-          }}
-        >
-          {speaking ? '▶ Nagpapatugtog...' : '▶ Pakinggan ang Buong Kwento'}
-        </button>
+        
 
         {/* Done button */}
         <button
