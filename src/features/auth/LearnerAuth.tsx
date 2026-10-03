@@ -87,7 +87,7 @@ export default function LearnerAuth({ onSuccess }: Props) {
           <button
             type="submit"
             disabled={code.trim().length === 0}
-            className="w-full min-h-[52px] rounded-xl bg-sky-500 text-white font-sans text-base font-bold transition-colors hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full min-h-13 rounded-xl bg-sky-500 text-white font-sans text-base font-bold transition-colors hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Pumasok →
           </button>

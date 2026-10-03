@@ -1,11 +1,14 @@
-﻿import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+﻿import { useState } from 'react'
+import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import {
   Leaf,
   LayoutDashboard,
   Users,
   FileBarChart,
+  LogOut,
   type LucideIcon,
 } from 'lucide-react'
+import { clearTeacherAuth } from '../../auth/teacherSession'
 
 interface NavItem {
   to: string
@@ -27,6 +30,12 @@ const TEACHER_NAV: NavItem[] = [
  */
 function AppLayout() {
   const navigate = useNavigate()
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
+
+  const confirmLogout = () => {
+    clearTeacherAuth()
+    navigate('/')
+  }
 
   return (
     <div className="min-h-screen bg-paper text-charcoal">
@@ -37,7 +46,7 @@ function AppLayout() {
           <div className="h-16 flex items-center justify-between gap-4">
             <button
               type="button"
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/teacher')}
               className="flex items-center gap-2 shrink-0"
             >
               <Leaf className="w-6 h-6 text-sprout-500" aria-hidden />
@@ -87,6 +96,15 @@ function AppLayout() {
                   M
                 </span>
               </span>
+              <button
+                type="button"
+                onClick={() => setShowLogoutConfirm(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 font-sans text-sm text-charcoal transition-colors"
+                title="Log out"
+              >
+                <LogOut className="w-4 h-4" aria-hidden />
+                <span className="hidden sm:inline">Log out</span>
+              </button>
             </div>
           </div>
 
@@ -123,6 +141,58 @@ function AppLayout() {
       <main className="px-4 sm:px-6 py-6 max-w-7xl mx-auto">
         <Outlet />
       </main>
+
+      {/* Log out confirmation modal */}
+      {showLogoutConfirm && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="logout-title"
+          aria-describedby="logout-desc"
+        >
+          {/* Backdrop */}
+          <button
+            type="button"
+            aria-label="Cancel log out"
+            onClick={() => setShowLogoutConfirm(false)}
+            className="absolute inset-0 bg-charcoal/40 backdrop-blur-sm"
+          />
+
+          {/* Dialog */}
+          <div className="relative w-full max-w-sm rounded-2xl bg-white shadow-xl border border-gray-100 p-6 space-y-4">
+            <div className="flex items-center gap-3">
+              <span className="w-10 h-10 rounded-full bg-coral-50 text-coral-500 flex items-center justify-center shrink-0">
+                <LogOut className="w-5 h-5" aria-hidden />
+              </span>
+              <h2 id="logout-title" className="font-display text-lg font-bold text-charcoal">
+                Log out of TALAS?
+              </h2>
+            </div>
+            <p id="logout-desc" className="font-sans text-sm text-gray-500 leading-relaxed">
+              You will be returned to the sign-in screen. Any unsaved work on the current
+              page may be lost.
+            </p>
+            <div className="flex justify-end gap-3 pt-1">
+              <button
+                type="button"
+                onClick={() => setShowLogoutConfirm(false)}
+                className="h-10 px-4 rounded-xl bg-paper border border-gray-200 hover:bg-gray-50 text-charcoal font-sans text-sm font-semibold transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmLogout}
+                className="h-10 px-4 rounded-xl bg-coral-500 hover:opacity-95 text-white font-sans text-sm font-semibold inline-flex items-center gap-1.5 transition-all shadow-sm"
+              >
+                <LogOut className="w-4 h-4" aria-hidden />
+                Log out
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

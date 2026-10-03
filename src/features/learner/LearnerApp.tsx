@@ -7,6 +7,7 @@ import SilentAssessment from '../../screens/learner/SilentAssessment'
 import FormalAssessmentCompletion from '../../screens/learner/FormalAssessmentCompletion'
 import PracticeActivity from '../../screens/learner/practice/PracticeActivity'
 import PracticeCompletion from '../../screens/learner/PracticeCompletion'
+import LearnerProfile from '../../screens/learner/LearnerProfile'
 import {
   getNextPracticeActivity,
   updatePracticeLevel,
@@ -38,6 +39,7 @@ type Screen =
   | 'formal-completion'
   | 'practice-activity'
   | 'practice-completion'
+  | 'profile'
 
 export default function LearnerApp() {
   // The authenticated learner (null until a valid code is entered).
@@ -103,7 +105,7 @@ export default function LearnerApp() {
           learnerName={learnerName}
           onStartAssessment={() => setCurrentScreen('oral-assessment')}
           onStartPractice={handleStartPractice}
-          onGoToProfile={handleExit}
+          onGoToProfile={() => setCurrentScreen('profile')}
         />
       )
     case 'oral-assessment':
@@ -156,7 +158,16 @@ export default function LearnerApp() {
           onBackToDashboard={() => setCurrentScreen('dashboard')}
         />
       )
-    default:
+case 'profile':
+      return (
+        <LearnerProfile
+          learnerName={learnerName}
+          practiceProfile={practiceProfile}
+          onBack={() => setCurrentScreen('dashboard')}
+          onExit={handleExit}
+        />
+      )
+        default:
       return null
   }
 }

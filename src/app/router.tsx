@@ -1,7 +1,7 @@
 ﻿import { createBrowserRouter } from 'react-router-dom'
 import RoleSelector from '../features/auth/RoleSelector'
 import LearnerApp from '../features/learner/LearnerApp'
-import AppLayout from '../features/shared/components/AppLayout'
+import TeacherGate from '../features/auth/TeacherGate'
 import LearnerLayout from '../layouts/LearnerLayout'
 import TeacherDashboard from '../features/teacher/dashboard/TeacherDashboard'
 import LearnersList from '../features/teacher/learners/LearnersList'
@@ -54,7 +54,7 @@ export const router = createBrowserRouter([
   },
   {
     path: '/teacher',
-    element: <AppLayout />,
+    element: <TeacherGate />,
     children: [
       { index: true, element: <TeacherDashboard /> },
       {
