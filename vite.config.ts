@@ -16,6 +16,22 @@ export default defineConfig({
       // network. App data lives in IndexedDB, not the SW cache.
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
+        // The Vosk WASM chunk is several MB; allow precaching larger files.
+        maximumFileSizeToCacheInBytes: 12 * 1024 * 1024,
+        // Runtime-cache the (large) offline Vosk speech model on first use so
+        // oral reading recognition works offline afterwards. Kept out of the
+        // precache so the app shell stays small and installs fast.
+        runtimeCaching: [
+          {
+            urlPattern: ({ url }) => url.pathname.startsWith('/models/'),
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'talas-speech-models',
+              expiration: { maxEntries: 4 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+        ],
       },
       includeAssets: ['favicon.svg'],
       manifest: {

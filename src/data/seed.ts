@@ -12,8 +12,19 @@
  */
 
 import { STORES } from "./types";
-import type { Assessment, Assignment, Learner, Teacher } from "./types";
+import type {
+  Assessment,
+  Assignment,
+  Learner,
+  ReadingPassage,
+  Teacher,
+} from "./types";
 import { count, openDB, put } from "./db";
+
+/** Counts whitespace-separated words in a passage body. */
+function words(body: string): number {
+  return body.trim().split(/\s+/).filter(Boolean).length;
+}
 
 /** Fixed timestamp so seeded data is deterministic across runs. */
 const SEED_TIME = "2026-10-03T09:00:00.000Z";
@@ -90,6 +101,60 @@ export const ASSIGNMENT_MARIA_MATH: Assignment = {
   updatedAt: SEED_TIME,
 };
 
+/* ------------------------------------------------------- Reading passages */
+/* Short Filipino stories for the oral reading assessment, by difficulty. */
+
+const PASSAGE_1_BODY =
+  "Si Bruno ay isang masayang palaka. Tumatalon siya sa mga lawa. " +
+  "Gustong-gusto niyang kumain ng gulay. Tuwing umaga ay naliligo siya sa ilog.";
+
+const PASSAGE_2_BODY =
+  "Maaga pang nagising si Lila. Inayos niya ang kaniyang mga libro at lapis. " +
+  "Naglakad siya patungo sa paaralan kasama ang kaniyang aso. " +
+  "Sa daan ay nakita niya ang mga ibong lumilipad sa malinaw na langit.";
+
+const PASSAGE_3_BODY =
+  "Noong unang panahon, may isang matalinong batang nagngangalang Dalisay. " +
+  "Mahilig siyang magbasa ng mga kuwento tungkol sa mga bituin at planeta. " +
+  "Isang gabi, nanaginip siyang naglalakbay sa kalawakan sakay ng isang bangkang gawa sa papel. " +
+  "Natuto siyang ang tunay na kayamanan ay nasa katanungan at pangarap.";
+
+export const PASSAGE_BRUNO: ReadingPassage = {
+  id: "passage-bruno",
+  title: "Si Bruno ang Palaka",
+  body: PASSAGE_1_BODY,
+  level: "antas-1",
+  wordCount: words(PASSAGE_1_BODY),
+  createdAt: SEED_TIME,
+  updatedAt: SEED_TIME,
+};
+
+export const PASSAGE_LILA: ReadingPassage = {
+  id: "passage-lila",
+  title: "Ang Umaga ni Lila",
+  body: PASSAGE_2_BODY,
+  level: "antas-2",
+  wordCount: words(PASSAGE_2_BODY),
+  createdAt: SEED_TIME,
+  updatedAt: SEED_TIME,
+};
+
+export const PASSAGE_DALISAY: ReadingPassage = {
+  id: "passage-dalisay",
+  title: "Ang Pangarap ni Dalisay",
+  body: PASSAGE_3_BODY,
+  level: "antas-3",
+  wordCount: words(PASSAGE_3_BODY),
+  createdAt: SEED_TIME,
+  updatedAt: SEED_TIME,
+};
+
+export const READING_PASSAGES: ReadingPassage[] = [
+  PASSAGE_BRUNO,
+  PASSAGE_LILA,
+  PASSAGE_DALISAY,
+];
+
 /**
  * Seeds the database once. Returns `true` if seed data was written, `false` if
  * the DB already had data and seeding was skipped.
@@ -98,6 +163,16 @@ export async function seedDatabase(): Promise<boolean> {
   // Make sure the stores exist before we count/write.
   await openDB();
 
+  // Reading passages are seeded independently so users upgrading from an
+  // earlier DB version (who already have learners/assessments) still get them.
+  let wrote = false;
+  if ((await count(STORES.readingPassages)) === 0) {
+    for (const passage of READING_PASSAGES) {
+      await put(STORES.readingPassages, { ...passage, dirty: true });
+    }
+    wrote = true;
+  }
+
   const existing =
     (await count(STORES.learners)) +
     (await count(STORES.teachers)) +
@@ -105,7 +180,7 @@ export async function seedDatabase(): Promise<boolean> {
     (await count(STORES.assignments));
 
   if (existing > 0) {
-    return false;
+    return wrote;
   }
 
   // Mark seeded records `dirty` so the first sync pushes them to the backend.

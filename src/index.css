@@ -52,12 +52,38 @@
   }
 }
 
+:root {
+  /* TALAS core palette */
+  --sprout: #4bae4f;
+  --sprout-dark: #3d9140;
+  --buttercup: #ffb82e;
+  --sky: #5d87e6;
+  --paper: #fafdf8;
+  --coral: #e66345;
+
+  /* Soft backgrounds */
+  --mint: #e8f8ec;
+  --buttercream: #fff9e6;
+  --sky-soft: #ebf2ff;
+
+  /* Neutrals used by TALAS screens */
+  --ink: #242923;
+  --ink-muted: #5c6358;
+  --line: #e3ebe0;
+
+  /* Typography roles */
+  --font-display: 'Comfortaa', system-ui, sans-serif;
+  --font-reading: 'Quicksand', system-ui, sans-serif;
+  --font-ui: 'Plus Jakarta Sans', system-ui, sans-serif;
+
+  --shadow-card: 0 12px 28px -12px rgba(36, 41, 35, 0.18);
+  --shadow-soft: 0 6px 18px -8px rgba(36, 41, 35, 0.14);
+}
+
 #root {
-  width: 1126px;
+  width: 100%;
   max-width: 100%;
   margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
   min-height: 100svh;
   display: flex;
   flex-direction: column;

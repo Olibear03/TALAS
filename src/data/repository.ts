@@ -12,7 +12,13 @@
  *   await save("learners", { id: "l1", name: "Nia", createdAt: now });
  */
 
-import { getAll, get, put, getAssignmentsByLearner } from "./db";
+import {
+  getAll,
+  get,
+  put,
+  getAssignmentsByLearner,
+  getReadingAttemptsByLearner,
+} from "./db";
 import type { Entity, StoreEntityMap, StoreName } from "./types";
 
 /** Current time as an ISO-8601 string. */
@@ -89,4 +95,14 @@ export async function listAssignmentsByLearner(
 ): Promise<StoreEntityMap["assignments"][]> {
   const all = await getAssignmentsByLearner(learnerId);
   return all.filter(isLive);
+}
+
+/** Lists live reading attempts for a learner, newest first. */
+export async function listReadingAttemptsByLearner(
+  learnerId: string,
+): Promise<StoreEntityMap["readingAttempts"][]> {
+  const all = await getReadingAttemptsByLearner(learnerId);
+  return all
+    .filter(isLive)
+    .sort((a, b) => (b.createdAt < a.createdAt ? -1 : 1));
 }

@@ -100,6 +100,73 @@ export interface Assignment extends SyncMeta {
   completedAt?: ISODateString;
 }
 
+/** Reading difficulty bands used by passages and adaptive practice. */
+export type ReadingLevel = "antas-1" | "antas-2" | "antas-3";
+
+/**
+ * A short reading passage (Filipino short story) a learner reads aloud during
+ * an oral reading assessment. `body` is the full text; `wordCount` is derived
+ * and cached for quick scoring/UI.
+ */
+export interface ReadingPassage extends SyncMeta {
+  id: string;
+  title: string;
+  /** Full passage text in Filipino. */
+  body: string;
+  level: ReadingLevel;
+  /** Precomputed word count (whitespace-split). */
+  wordCount: number;
+  createdAt: ISODateString;
+}
+
+/** Per-word match outcome from comparing recognized speech to the passage. */
+export interface WordResult {
+  /** Index of the word in the passage (0-based). */
+  index: number;
+  /** The expected word (normalized for display is done in UI). */
+  expected: string;
+  /** True if the learner's speech matched this word. */
+  correct: boolean;
+  /**
+   * Index of the spoken word that matched this passage word (-1 if the word was
+   * skipped/not read). Used to attach the exact recognizer timing.
+   */
+  spokenIndex?: number;
+  /**
+   * Exact time (seconds from the start of the recording) when the learner said
+   * this word, captured live from the recording clock. Used by the review UI to
+   * seek the audio to the precise moment the word was read.
+   */
+  timeSec?: number;
+}
+
+/**
+ * A learner's attempt at reading a passage aloud. Produced on the learner's
+ * device: speech is recognized (online via Web Speech API, or scored from a
+ * manual/offline transcript), compared word-by-word to the passage, and the
+ * result persisted to IndexedDB so it syncs when a connection is available.
+ */
+export interface ReadingAttempt extends SyncMeta {
+  id: string;
+  passageId: string;
+  learnerId: string;
+  /** Raw transcript of what the recognizer (or learner) produced. */
+  transcript: string;
+  /** 0–100 reading accuracy = correctWords / totalWords. */
+  accuracy: number;
+  correctWords: number;
+  totalWords: number;
+  /** Per-word breakdown for teacher review and UI highlighting. */
+  words: WordResult[];
+  /** How the transcript was captured. */
+  method: "speech-api" | "manual";
+  /** Whether the device was online when the attempt was scored. */
+  online: boolean;
+  /** Seconds of recorded audio, if captured. */
+  durationSec?: number;
+  createdAt: ISODateString;
+}
+
 /**
  * Names of the entity object stores. Single source of truth. These all hold
  * records keyed by `id` and participate in sync.
@@ -109,6 +176,8 @@ export const STORES = {
   teachers: "teachers",
   assessments: "assessments",
   assignments: "assignments",
+  readingPassages: "readingPassages",
+  readingAttempts: "readingAttempts",
 } as const;
 
 export type StoreName = (typeof STORES)[keyof typeof STORES];
@@ -136,6 +205,8 @@ export interface StoreEntityMap {
   teachers: Teacher;
   assessments: Assessment;
   assignments: Assignment;
+  readingPassages: ReadingPassage;
+  readingAttempts: ReadingAttempt;
 }
 
 /** Any persisted entity (union across the entity stores). */

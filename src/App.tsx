@@ -1,17 +1,7 @@
-import SyncIndicator from './components/SyncIndicator'
-import AddLearner from './components/AddLearner'
-import DataViewer from './components/DataViewer'
-import CloudViewer from './components/CloudViewer'
+import ReadingAssessment from './components/ReadingAssessment'
 
 function App() {
-  return (
-    <>
-      <SyncIndicator />
-      <AddLearner />
-      <DataViewer />
-      <CloudViewer />
-    </>
-  )
+  return <ReadingAssessment />
 }
 
 export default App

@@ -16,8 +16,9 @@ const DB_NAME = "talas";
 /**
  * v1: initial entity stores.
  * v2: added the `syncState` key-value store for offline/online sync.
+ * v3: added `readingPassages` + `readingAttempts` stores (oral reading assessment).
  */
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 
 let dbPromise: Promise<IDBDatabase> | null = null;
 
@@ -49,6 +50,12 @@ export function openDB(): Promise<IDBDatabase> {
             store.createIndex("by_assessment", "assessmentId", {
               unique: false,
             });
+          }
+
+          // Reading attempts are queried per-learner for profiles/history.
+          if (name === STORES.readingAttempts) {
+            store.createIndex("by_learner", "learnerId", { unique: false });
+            store.createIndex("by_passage", "passageId", { unique: false });
           }
         }
       }
@@ -172,6 +179,18 @@ export async function getAssignmentsByLearner(
   const index = tx.objectStore(STORES.assignments).index("by_learner");
   return promisifyRequest(
     index.getAll(learnerId) as IDBRequest<StoreEntityMap["assignments"][]>,
+  );
+}
+
+/** Returns all reading attempts for a learner, using the by_learner index. */
+export async function getReadingAttemptsByLearner(
+  learnerId: string,
+): Promise<StoreEntityMap["readingAttempts"][]> {
+  const db = await openDB();
+  const tx = db.transaction(STORES.readingAttempts, "readonly");
+  const index = tx.objectStore(STORES.readingAttempts).index("by_learner");
+  return promisifyRequest(
+    index.getAll(learnerId) as IDBRequest<StoreEntityMap["readingAttempts"][]>,
   );
 }
 
