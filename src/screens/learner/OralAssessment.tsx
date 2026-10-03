@@ -63,6 +63,8 @@ export default function OralAssessment({
   const speech = useSpeechRecognition('fil-PH')
   const [elapsedSeconds, setElapsedSeconds] = useState<number>(0)
   const finishingRef = useRef(false)
+  // Ensures the attempt is persisted at most once per reading.
+  const submittedRef = useRef(false)
 
   const isRecording = speech.isRecording
   const hasStopped = speech.status === 'done'
@@ -174,6 +176,7 @@ export default function OralAssessment({
 
   const handleStart = () => {
     finishingRef.current = false
+    submittedRef.current = false
     setElapsedSeconds(0)
     void speech.start()
   }
@@ -187,6 +190,7 @@ export default function OralAssessment({
 
   const handleUlitin = () => {
     finishingRef.current = false
+    submittedRef.current = false
     speech.reset()
     setElapsedSeconds(0)
   }
@@ -196,6 +200,9 @@ export default function OralAssessment({
   }
 
   const handleSubmit = async () => {
+    // Guard against double-submits (fast double-tap, re-render) saving twice.
+    if (submittedRef.current) return
+    submittedRef.current = true
     const transcript = speech.transcript
     const result = buildResult(transcript)
     await persist(result)
