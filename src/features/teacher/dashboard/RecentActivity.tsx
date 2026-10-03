@@ -65,8 +65,8 @@ function RecentActivity() {
             <li key={a.id}>
               <button
                 type="button"
-                onClick={() => navigate(`/teacher/learners/${a.learnerId}`)}
-                title={`Open ${learnerName(a.learnerId)}'s profile`}
+                onClick={() => navigate(`/teacher/activities/${a.id}/review`)}
+                title={`Review ${learnerName(a.learnerId)}'s reading`}
                 className="group w-full flex items-center gap-3 p-3 rounded-xl bg-paper border border-gray-100 hover:bg-gray-50 hover:shadow-sm text-left transition-all"
               >
                 <span className="w-9 h-9 rounded-lg bg-coral-50 text-coral-500 flex items-center justify-center shrink-0">
