@@ -1,55 +1,64 @@
 import { useState } from 'react'
-import LearnerEntry from './screens/LearnerEntry'
-import ReadingLobby from './screens/ReadingLobby'
-import SilentPassage from './screens/SilentPassage'
-import ComprehensionQuiz from './screens/ComprehensionQuiz'
-import CompletionScreen from './screens/CompletionScreen'
-import { mockQuiz } from './data/mockData'
+import LearnerAccess from './screens/learner/LearnerAccess'
+import LearnerDashboard from './screens/learner/LearnerDashboard'
+import OralAssessment from './screens/learner/OralAssessment'
+import OralCompletion from './screens/learner/OralCompletion'
+import SilentAssessment from './screens/learner/SilentAssessment'
+import FormalAssessmentCompletion from './screens/learner/FormalAssessmentCompletion'
 
-type Screen = 'entry' | 'lobby' | 'passage' | 'quiz' | 'completion'
+type Screen =
+  | 'learner-access'
+  | 'dashboard'
+  | 'oral-assessment'
+  | 'oral-completion'
+  | 'silent-assessment'
+  | 'formal-completion'
 
 export default function App() {
-  const [currentScreen, setCurrentScreen] = useState<Screen>('entry')
+  const [currentScreen, setCurrentScreen] = useState<Screen>('learner-access')
   const [learnerName, setLearnerName] = useState<string>('')
-  const [score, setScore] = useState<number>(0)
 
-  const handleStart = (name: string) => {
+  const handleAccess = (name: string) => {
     setLearnerName(name)
-    setCurrentScreen('lobby')
-  }
-
-  const handleStartReading = () => setCurrentScreen('passage')
-
-  const handleDoneReading = () => setCurrentScreen('quiz')
-
-  const handleQuizComplete = (finalScore: number) => {
-    setScore(finalScore)
-    setCurrentScreen('completion')
-  }
-
-  const handleDone = () => {
-    setLearnerName('')
-    setScore(0)
-    setCurrentScreen('entry')
+    setCurrentScreen('dashboard')
   }
 
   switch (currentScreen) {
-    case 'entry':
-      return <LearnerEntry onStart={handleStart} />
-    case 'lobby':
-      return <ReadingLobby learnerName={learnerName} onStartReading={handleStartReading} />
-    case 'passage':
-      return <SilentPassage onDoneReading={handleDoneReading} />
-    case 'quiz':
-      return <ComprehensionQuiz onComplete={handleQuizComplete} />
-    case 'completion':
+    case 'learner-access':
+      return <LearnerAccess onAccess={handleAccess} />
+    case 'dashboard':
       return (
-        <CompletionScreen
+        <LearnerDashboard
           learnerName={learnerName}
-          score={score}
-          totalQuestions={mockQuiz.length}
-          onDone={handleDone}
+          onStartAssessment={() => setCurrentScreen('oral-assessment')}
+          onGoToProfile={() => alert('Profile — malapit na!')}
         />
       )
+    case 'oral-assessment':
+      return (
+        <OralAssessment
+          learnerName={learnerName}
+          onBack={() => setCurrentScreen('dashboard')}
+          onSubmit={() => setCurrentScreen('oral-completion')}
+        />
+      )
+    case 'oral-completion':
+      return <OralCompletion onContinue={() => setCurrentScreen('silent-assessment')} />
+    case 'silent-assessment':
+      return (
+        <SilentAssessment
+          learnerName={learnerName}
+          onComplete={() => setCurrentScreen('formal-completion')}
+        />
+      )
+    case 'formal-completion':
+      return (
+        <FormalAssessmentCompletion
+          learnerName={learnerName}
+          onDone={() => setCurrentScreen('dashboard')}
+        />
+      )
+    default:
+      return null
   }
 }

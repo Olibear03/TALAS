@@ -8,6 +8,7 @@ export interface QuizQuestion {
   question: string
   choices: [string, string, string, string]
   correctIndex: number
+  explanation: string
 }
 
 export const mockAssignment: Assignment = {
@@ -33,6 +34,7 @@ export const mockQuiz: QuizQuestion[] = [
       'Sa gitna ng kagubatan',
     ],
     correctIndex: 1,
+    explanation: 'Nakatira si Nino sa isang nayon malapit sa bundok ayon sa kwento.',
   },
   {
     question: 'Ano ang ginagawa ni Nino sa palayan?',
@@ -43,6 +45,7 @@ export const mockQuiz: QuizQuestion[] = [
       'Nag-aaral siya',
     ],
     correctIndex: 2,
+    explanation: 'Sinabi sa kwento na tinutulungan ni Nino ang kanyang ama sa palayan.',
   },
   {
     question: 'Sino ang nagdala ng pagkain nang tanghali?',
@@ -53,6 +56,7 @@ export const mockQuiz: QuizQuestion[] = [
       'Ang kanyang ina',
     ],
     correctIndex: 3,
+    explanation: 'Ang kanyang ina ang nagdala ng pagkain nang tanghali sa bukid.',
   },
   {
     question: 'Paano naramdaman ni Nino pagkatapos ng trabaho?',
@@ -63,5 +67,6 @@ export const mockQuiz: QuizQuestion[] = [
       'Pagod na pagod siya',
     ],
     correctIndex: 2,
+    explanation: 'Ipinagmamalaki ni Nino ang kanyang pamilya at ang kanilang pagsisikap.',
   },
 ]
