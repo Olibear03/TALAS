@@ -1,11 +1,12 @@
 ﻿import { useNavigate } from 'react-router-dom'
+import { Leaf, GraduationCap, BookOpen, ArrowRight, type LucideIcon } from 'lucide-react'
 
 interface RoleCard {
   role: 'teacher' | 'learner'
   title: string
   blurb: string
   to: string
-  icon: string
+  icon: LucideIcon
   accent: 'sprout' | 'sky'
 }
 
@@ -15,7 +16,7 @@ const ROLE_CARDS: RoleCard[] = [
     title: 'I\u2019m a Teacher',
     blurb: 'Assign assessments, review learner work, and track progress.',
     to: '/teacher',
-    icon: '\u{1F468}\u200D\u{1F3EB}',
+    icon: GraduationCap,
     accent: 'sprout',
   },
   {
@@ -23,7 +24,7 @@ const ROLE_CARDS: RoleCard[] = [
     title: 'I\u2019m a Learner',
     blurb: 'Complete your assigned work, practice, and grow your streak.',
     to: '/learner/home',
-    icon: '\u{1F9D1}\u200D\u{1F393}',
+    icon: BookOpen,
     accent: 'sky',
   },
 ]
@@ -52,7 +53,7 @@ function RoleSelector() {
     <main className="min-h-screen bg-paper flex flex-col items-center justify-center px-6 py-16">
       <header className="max-w-2xl text-center flex flex-col items-center gap-4">
         <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sprout-50 text-sprout-500 font-sans text-sm font-bold tracking-wide">
-          <span aria-hidden="true">🍃</span> TALAS
+          <Leaf className="w-4 h-4" aria-hidden /> TALAS
         </span>
         <h1 className="font-display text-4xl sm:text-5xl font-bold text-charcoal leading-tight">
           Teaching &amp; Learning,
@@ -68,6 +69,7 @@ function RoleSelector() {
       >
         {ROLE_CARDS.map((card) => {
           const accent = ACCENT[card.accent]
+          const Icon = card.icon
           return (
             <button
               key={card.role}
@@ -76,10 +78,10 @@ function RoleSelector() {
               className={`group text-left bg-white rounded-2xl border border-gray-200 p-7 transition-all shadow-sm hover:shadow-md ${accent.ring}`}
             >
               <span
-                className={`inline-flex items-center justify-center w-14 h-14 rounded-2xl text-2xl ${accent.chip}`}
+                className={`inline-flex items-center justify-center w-14 h-14 rounded-2xl ${accent.chip}`}
                 aria-hidden="true"
               >
-                {card.icon}
+                <Icon className="w-7 h-7" aria-hidden />
               </span>
               <h2 className="mt-5 font-display text-xl font-bold text-charcoal">
                 {card.title}
@@ -89,9 +91,7 @@ function RoleSelector() {
                 className={`mt-5 inline-flex items-center gap-1 font-sans font-semibold ${accent.cta}`}
               >
                 Continue
-                <span className="transition-transform group-hover:translate-x-0.5">
-                  &rarr;
-                </span>
+                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" aria-hidden />
               </span>
             </button>
           )

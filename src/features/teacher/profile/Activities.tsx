@@ -1,13 +1,14 @@
 ﻿import { useParams } from 'react-router-dom'
+import { TrendingUp, Minus, TrendingDown, Sparkles, BarChart3, Clock, type LucideIcon } from 'lucide-react'
 import {
   learnerProfile,
   type PracticeTrend,
 } from '../dashboard/sectionData'
 
-const TREND_META: Record<PracticeTrend, { icon: string; chip: string }> = {
-  Improving: { icon: '📈', chip: 'bg-sprout-50 text-sprout-500' },
-  Steady: { icon: '➡️', chip: 'bg-sky-50 text-sky-500' },
-  'Needs attention': { icon: '⚠️', chip: 'bg-coral-50 text-coral-500' },
+const TREND_META: Record<PracticeTrend, { icon: LucideIcon; chip: string }> = {
+  Improving: { icon: TrendingUp, chip: 'bg-sprout-50 text-sprout-500' },
+  Steady: { icon: Minus, chip: 'bg-sky-50 text-sky-500' },
+  'Needs attention': { icon: TrendingDown, chip: 'bg-coral-50 text-coral-500' },
 }
 
 /** Practice Progress tab — adaptive practice, performance, and history. Not a formal result. */
@@ -20,7 +21,7 @@ function Activities() {
     return (
       <section className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 lg:p-8 space-y-5">
         <div className="flex items-center gap-2">
-          <span className="text-lg" aria-hidden="true">📈</span>
+          <TrendingUp className="w-5 h-5 text-charcoal" aria-hidden />
           <h2 className="font-display text-lg font-bold text-charcoal">Practice Progress</h2>
         </div>
         <p className="font-sans text-sm text-gray-400">No practice sessions recorded for this learner yet.</p>
@@ -29,13 +30,14 @@ function Activities() {
   }
 
   const trend = TREND_META[practice.trend]
+  const TrendIcon = trend.icon
 
   return (
     <div className="space-y-6">
       {/* Current level + trend */}
       <section className="bg-white rounded-2xl border border-dashed border-sky-500/40 shadow-sm overflow-hidden">
         <div className="flex flex-wrap items-center gap-2 px-6 py-3 bg-sky-50 border-b border-sky-500/20">
-          <span className="text-lg" aria-hidden="true">✨</span>
+          <Sparkles className="w-5 h-5 text-charcoal" aria-hidden />
           <h2 className="font-display text-base font-bold text-charcoal">Practice Progress</h2>
           <span className="ml-auto inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white text-sky-500 font-sans text-xs font-bold">
             Adaptive · not a formal result
@@ -53,32 +55,12 @@ function Activities() {
                 {practice.domain}
               </span>
               <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full font-sans text-xs font-bold ${trend.chip}`}>
-                <span aria-hidden="true">{trend.icon}</span>
+                <TrendIcon className="w-4 h-4" aria-hidden />
                 {practice.trend}
               </span>
             </div>
           </div>
 
-          {/* Recent performance bars */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="font-sans text-sm font-semibold text-charcoal">Recent practice performance</span>
-              <span className="font-sans text-xs text-gray-400">Last {practice.recentAccuracy.length} sessions</span>
-            </div>
-            <div className="grid grid-cols-3 gap-3">
-              {practice.recentAccuracy.map((s) => (
-                <div key={s.label} className="flex flex-col items-center gap-2 p-3 bg-paper border border-gray-100 rounded-xl">
-                  <div className="w-full flex items-end justify-center h-24 bg-white rounded-lg p-1.5">
-                    <div className="w-full bg-sky-500 rounded-md transition-all duration-500" style={{ height: `${s.pct}%` }} />
-                  </div>
-                  <div className="text-center">
-                    <span className="font-display text-lg font-bold text-charcoal">{s.pct}%</span>
-                    <p className="font-sans text-xs text-gray-400">{s.label}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
 
           <p className="font-sans text-xs text-gray-500 bg-sky-50/60 rounded-lg px-3 py-2">{practice.note}</p>
         </div>
@@ -88,7 +70,7 @@ function Activities() {
       {practice.history.length > 0 && (
         <section className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-4">
           <div className="flex items-center gap-2">
-            <span className="text-lg" aria-hidden="true">📊</span>
+            <BarChart3 className="w-5 h-5 text-charcoal" aria-hidden />
             <h2 className="font-display text-base font-bold text-charcoal">Progress Over Time</h2>
           </div>
 
@@ -110,7 +92,7 @@ function Activities() {
       {/* Practice activity history */}
       <section className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
         <div className="flex items-center gap-2 px-6 py-4">
-          <span className="text-lg" aria-hidden="true">🕑</span>
+          <Clock className="w-5 h-5 text-charcoal" aria-hidden />
           <h2 className="font-display text-base font-bold text-charcoal">Practice Activity History</h2>
           <span className="ml-auto font-sans text-xs text-gray-400">{practice.history.length} sessions</span>
         </div>

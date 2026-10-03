@@ -1,11 +1,12 @@
 ﻿import { NavLink, Outlet, useNavigate, useParams } from 'react-router-dom'
-import { learnerProfile, crlaLabel } from '../features/teacher/dashboard/sectionData'
+import { ArrowLeft, Compass, Lock, Bandage, TrendingUp, Check, Printer, SquarePen, type LucideIcon } from 'lucide-react'
+import { learnerProfile, crlaLabel, crlaDescription } from '../features/teacher/dashboard/sectionData'
 
-const TABS: { to: string; label: string; icon: string; end?: boolean }[] = [
-  { to: '', label: 'Overview', icon: '🧭', end: true },
-  { to: 'formal-assessment', label: 'Formal Assessments', icon: '🔒' },
-  { to: 'recommendations', label: 'Intervention History', icon: '🩹' },
-  { to: 'activities', label: 'Practice Progress', icon: '📈' },
+const TABS: { to: string; label: string; icon: LucideIcon; end?: boolean }[] = [
+  { to: '', label: 'Overview', icon: Compass, end: true },
+  { to: 'formal-assessment', label: 'Formal Assessments', icon: Lock },
+  { to: 'recommendations', label: 'Intervention History', icon: Bandage },
+  { to: 'activities', label: 'Practice Progress', icon: TrendingUp },
 ]
 
 /**
@@ -27,7 +28,7 @@ function LearnerLayout() {
           onClick={() => navigate('/teacher/learners')}
           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 font-sans text-sm text-charcoal transition-colors"
         >
-          ← Back to Learners
+          <ArrowLeft className="w-4 h-4" aria-hidden /> Back to Learners
         </button>
         <div className="bg-white rounded-2xl border border-gray-200 p-8 text-center font-sans text-gray-500">
           Learner <span className="font-semibold text-charcoal">{learnerId}</span> was not found.
@@ -48,7 +49,7 @@ function LearnerLayout() {
             onClick={() => navigate('/teacher/learners')}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 text-charcoal transition-colors"
           >
-            ← Back to Learners
+            <ArrowLeft className="w-4 h-4" aria-hidden /> Back to Learners
           </button>
           <span className="text-gray-300">/</span>
           <span>{record.grade}</span>
@@ -71,8 +72,8 @@ function LearnerLayout() {
               <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-sprout-50 text-sprout-500 flex items-center justify-center font-display text-2xl font-bold">
                 {record.initials}
               </div>
-              <span className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-sprout-500 text-white flex items-center justify-center text-xs shadow-sm" aria-hidden="true">
-                ✓
+              <span className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-sprout-500 text-white flex items-center justify-center shadow-sm">
+                <Check className="w-3.5 h-3.5" aria-label="Verified learner" role="img" />
               </span>
             </div>
 
@@ -84,8 +85,20 @@ function LearnerLayout() {
                 {record.grade} — <span className="font-semibold text-charcoal">{profile.className}</span>
                 <span className="mx-2 text-gray-300">•</span>
                 Adviser: {profile.adviser}
-                <span className="mx-2 text-gray-300">•</span>
-                CRLA: <span className="font-semibold text-charcoal">{crlaLabel(record.level)}</span>
+              </p>
+              <div className="flex items-center gap-2 pt-0.5">
+                <span className="font-sans text-xs text-gray-400 uppercase tracking-wide">
+                  Formal reading level
+                </span>
+                <span className="font-display text-base font-bold text-charcoal">
+                  {record.level ?? '—'}
+                </span>
+                <span className="inline-flex px-2 py-0.5 rounded-full bg-crla-fr/15 text-crla-fr font-sans text-xs font-bold">
+                  {crlaLabel(record.level)}
+                </span>
+              </div>
+              <p className="font-display text-xs text-gray-500 leading-relaxed max-w-xl">
+                {crlaDescription(record.level)}
               </p>
               <div className="flex flex-wrap items-center gap-2 pt-1">
                 <span className="px-2.5 py-1 rounded-md bg-paper border border-gray-100 font-sans text-xs font-semibold text-charcoal">
@@ -106,13 +119,13 @@ function LearnerLayout() {
               type="button"
               className="flex-1 lg:flex-none h-11 px-4 rounded-xl bg-paper border border-gray-200 hover:bg-gray-50 text-charcoal font-sans text-sm font-semibold inline-flex items-center justify-center gap-2 transition-colors"
             >
-              🖨️ Print Learner Card
+              <Printer className="w-4 h-4" aria-hidden /> Print Learner Card
             </button>
             <button
               type="button"
               className="flex-1 lg:flex-none h-11 px-5 rounded-xl bg-sprout-500 hover:opacity-95 text-white font-sans text-sm font-semibold inline-flex items-center justify-center gap-2 transition-all shadow-sm"
             >
-              📝 Record Observation
+              <SquarePen className="w-4 h-4" aria-hidden /> Review Assessment
             </button>
           </div>
         </div>
@@ -122,23 +135,26 @@ function LearnerLayout() {
           aria-label="Learner sections"
           className="flex items-center gap-2 overflow-x-auto border-t border-gray-100 pt-4"
         >
-          {TABS.map((tab) => (
-            <NavLink
-              key={tab.to || 'overview'}
-              to={tab.to ? `${base}/${tab.to}` : base}
-              end={tab.end}
-              className={({ isActive }) =>
-                `px-4 py-2 rounded-xl whitespace-nowrap font-sans text-sm inline-flex items-center gap-2 transition-colors ${
-                  isActive
-                    ? 'bg-sprout-50 text-sprout-500 font-bold'
-                    : 'text-gray-600 hover:text-charcoal hover:bg-gray-50'
-                }`
-              }
-            >
-              <span aria-hidden="true">{tab.icon}</span>
-              {tab.label}
-            </NavLink>
-          ))}
+          {TABS.map((tab) => {
+            const Icon = tab.icon
+            return (
+              <NavLink
+                key={tab.to || 'overview'}
+                to={tab.to ? `${base}/${tab.to}` : base}
+                end={tab.end}
+                className={({ isActive }) =>
+                  `px-4 py-2 rounded-xl whitespace-nowrap font-sans text-sm inline-flex items-center gap-2 transition-colors ${
+                    isActive
+                      ? 'bg-sprout-50 text-sprout-500 font-bold'
+                      : 'text-gray-600 hover:text-charcoal hover:bg-gray-50'
+                  }`
+                }
+              >
+                <Icon className="w-4 h-4" aria-hidden />
+                {tab.label}
+              </NavLink>
+            )
+          })}
         </nav>
       </section>
 

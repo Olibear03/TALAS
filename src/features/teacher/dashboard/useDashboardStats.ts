@@ -6,6 +6,7 @@ export interface DashboardStats {
   assessedCount: number
   needSupportCount: number
   activeTodayCount: number
+  needsReviewCount: number
 }
 
 /**
@@ -21,11 +22,13 @@ export function useDashboardStats(sectionId: string = 'all'): DashboardStats {
     (l) => l.level === 'MR' || l.level === 'FR',
   ).length
   const activeTodayCount = learners.filter((l) => l.activeToday).length
+  const needsReviewCount = learners.filter((l) => l.needsReview).length
 
   return {
     totalLearners: learners.length,
     assessedCount,
     needSupportCount,
     activeTodayCount,
+    needsReviewCount,
   }
 }

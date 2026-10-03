@@ -1,8 +1,9 @@
 ﻿import { useNavigate } from 'react-router-dom'
+import { Headphones, Lightbulb, BarChart3, ArrowRight, type LucideIcon } from 'lucide-react'
 
 interface PendingAction {
   id: string
-  icon: string
+  icon: LucideIcon
   title: string
   detail: string
   to: string
@@ -12,7 +13,7 @@ interface PendingAction {
 const ACTIONS: PendingAction[] = [
   {
     id: 'reviews',
-    icon: '🎧',
+    icon: Headphones,
     title: '4 oral assessments to review',
     detail: 'Submitted in the last 2 days · requires audio playback',
     to: '/teacher/activities',
@@ -20,7 +21,7 @@ const ACTIONS: PendingAction[] = [
   },
   {
     id: 'recs',
-    icon: '💡',
+    icon: Lightbulb,
     title: '3 recommendations pending',
     detail: 'Approve or dismiss suggested next steps',
     to: '/teacher/recommendations',
@@ -28,7 +29,7 @@ const ACTIONS: PendingAction[] = [
   },
   {
     id: 'assign',
-    icon: '📊',
+    icon: BarChart3,
     title: '8 learners awaiting assessment',
     detail: 'Not yet assessed this quarter',
     to: '/teacher/assessments',
@@ -59,6 +60,7 @@ function PendingActions() {
       <div className="flex flex-col gap-3">
         {ACTIONS.map((a) => {
           const tone = TONE[a.tone]
+          const Icon = a.icon
           return (
             <button
               key={a.id}
@@ -68,18 +70,16 @@ function PendingActions() {
             >
               <span className={`absolute left-0 top-0 bottom-0 w-1 ${tone.bar}`} aria-hidden="true" />
               <span
-                className={`inline-flex items-center justify-center w-11 h-11 rounded-xl text-lg shrink-0 ${tone.chip}`}
+                className={`inline-flex items-center justify-center w-11 h-11 rounded-xl shrink-0 ${tone.chip}`}
                 aria-hidden="true"
               >
-                {a.icon}
+                <Icon className="w-5 h-5" aria-hidden />
               </span>
               <span className="flex flex-col min-w-0">
                 <span className="font-sans text-sm font-semibold text-charcoal">{a.title}</span>
                 <span className="font-sans text-xs text-gray-400">{a.detail}</span>
               </span>
-              <span className="ml-auto text-gray-300 group-hover:translate-x-0.5 transition-transform" aria-hidden="true">
-                →
-              </span>
+              <ArrowRight className="w-4 h-4 ml-auto text-gray-300 group-hover:translate-x-0.5 transition-transform" aria-hidden />
             </button>
           )
         })}
