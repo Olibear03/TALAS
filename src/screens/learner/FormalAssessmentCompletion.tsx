@@ -62,7 +62,7 @@ export default function FormalAssessmentCompletion({ learnerName, onDone }: Prop
           maxWidth: '320px',
         }}
       >
-        Naipadala na ang iyong binasa kay Teacher Maria. Hintayin ang kanyang komento at maayang ngiti!
+        Naipadala na ang iyong binasa kay Teacher Maria. Hintayin ang kanyang komento.
       </p>
 
       {/* Audio button */}

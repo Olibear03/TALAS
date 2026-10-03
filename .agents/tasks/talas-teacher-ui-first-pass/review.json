@@ -1,0 +1,18 @@
+{
+  "verdict": "APPROVED",
+  "findings": [
+    {
+      "label": "Formal-assessment section shows all submissions",
+      "severity": "non-blocking",
+      "confidence": "confirmed",
+      "detail": "LearnerProfile's 'Mga Nakaraang Pagtatasa (Pormal)' sets formalSubmissions = learnerSubmissions, so it lists every submission for the learner rather than filtering to formal assignments. Acceptable for a mock-only first pass; narrow if a true formal-only view is wanted later."
+    },
+    {
+      "label": "Assign loses learner context from profile",
+      "severity": "non-blocking",
+      "confidence": "confirmed",
+      "detail": "LearnerProfile's 'Mag-assign ng Pagtatasa' routes to AssignAssessment, which takes no learnerId and starts with an empty selection, so the viewed learner isn't pre-selected. Non-blocking; consider passing/pre-checking the learner in a later pass."
+    }
+  ],
+  "reviewDoc": "c:\\Users\\ashai\\TALAS\\.agents\\tasks\\talas-teacher-ui-first-pass\\review.md"
+}
