@@ -1,0 +1,15 @@
+Build run: first iteration
+Command: npm run build (tsc -b && vite build)
+Exit code: 0
+Result: SUCCESS
+
+Output summary:
+  vite v8.3.2 building client environment for production...
+  23 modules transformed.
+  dist/index.html                   0.46 kB │ gzip:  0.30 kB
+  dist/assets/index-B1dhcNYs.css    8.10 kB │ gzip:  2.44 kB
+  dist/assets/index-Ds_qHSEW.js   231.06 kB │ gzip: 71.46 kB
+  built in 1.90s
+
+TypeScript errors: 0
+Unused locals/parameters errors: 0
