@@ -8,29 +8,55 @@ import RecentActivity from './RecentActivity'
 import LearnerListTable from './LearnerListTable'
 
 /**
- * Teacher Dashboard page (route `/teacher`). Rendered inside <AppLayout>,
- * so it provides page content only. The teacher picks a section and the
- * stats, distribution, and learner table filter to that section.
+ * Teacher Dashboard page (route `/teacher`). Rendered inside <AppLayout>.
+ * Greeting + section selector up top, a metric row, then an 8/4 two-column
+ * grid. The section selector filters stats, distribution, and the roster.
  */
 function TeacherDashboard() {
   const [sectionId, setSectionId] = useState('all')
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <DashboardHeader />
-        <SectionSelector value={sectionId} onChange={setSectionId} />
+    <div className="relative">
+      {/* Ambient backdrop glow */}
+      <div className="absolute -top-10 -right-8 w-96 h-96 bg-sprout-50 rounded-full blur-3xl pointer-events-none -z-10" />
+      <div className="absolute top-48 -left-12 w-80 h-80 bg-sky-50 rounded-full blur-3xl pointer-events-none -z-10" />
+
+      <div className="space-y-8">
+        {/* Header + controls */}
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <DashboardHeader />
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            <SectionSelector value={sectionId} onChange={setSectionId} />
+          </div>
+        </div>
+
+        {/* Metric row */}
+        <QuickStats sectionId={sectionId} />
+
+        {/* Two-column grid: 8 / 4 */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
+          <div className="lg:col-span-8 space-y-6">
+            <PendingActions />
+            <ClassDistribution sectionId={sectionId} />
+            <LearnerListTable sectionId={sectionId} />
+          </div>
+
+          <aside className="lg:col-span-4 space-y-6">
+            <RecentActivity />
+
+            <div className="rounded-2xl bg-sky-50 p-5 space-y-2">
+              <div className="flex items-center gap-2 text-sky-500 font-sans text-sm font-bold">
+                <span aria-hidden="true">📖</span>
+                <span>Phil-IRI Strategy Note</span>
+              </div>
+              <p className="font-reading text-sm text-charcoal/70 leading-relaxed">
+                Prioritize phoneme blending check-ins for emergent readers before
+                moving them to multi-syllabic passages in Week 6.
+              </p>
+            </div>
+          </aside>
+        </div>
       </div>
-
-      <QuickStats sectionId={sectionId} />
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <PendingActions />
-        <ClassDistribution sectionId={sectionId} />
-      </div>
-
-      <RecentActivity />
-      <LearnerListTable sectionId={sectionId} />
     </div>
   )
 }

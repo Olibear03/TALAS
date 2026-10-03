@@ -59,10 +59,7 @@ function RoleSelector() {
           <br />
           <span className="text-sprout-500">assessed with care.</span>
         </h1>
-        <p className="font-reading text-lg text-charcoal/70 max-w-xl">
-          A gentle, adaptive assessment companion for teachers and learners.
-          Pick how you&rsquo;re here today to get started.
-        </p>
+        
       </header>
 
       <section

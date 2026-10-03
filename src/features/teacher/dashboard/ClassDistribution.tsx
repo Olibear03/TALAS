@@ -28,14 +28,16 @@ function ClassDistribution({ sectionId = 'all' }: ClassDistributionProps) {
   const totalAssessed = counts.reduce((sum, b) => sum + b.count, 0)
 
   return (
-    <section className="bg-white rounded-2xl border border-gray-200 p-5 flex flex-col gap-4">
+    <section className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm flex flex-col gap-5">
       <div className="flex items-center justify-between">
         <h2 className="font-display text-lg font-bold text-charcoal">Class Distribution</h2>
-        <span className="font-sans text-xs text-gray-400">{totalAssessed} assessed</span>
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-sprout-50 text-sprout-500 font-sans text-xs font-semibold">
+          {totalAssessed} assessed
+        </span>
       </div>
 
       {/* Stacked bar */}
-      <div className="flex w-full h-3 rounded-full overflow-hidden bg-gray-100">
+      <div className="flex w-full h-3.5 rounded-full overflow-hidden bg-gray-100">
         {totalAssessed > 0 &&
           counts.map((b) => (
             <div

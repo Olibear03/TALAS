@@ -33,9 +33,14 @@ function LearnerListTable({ sectionId = 'all' }: LearnerListTableProps) {
   const learners = learnersForSection(sectionId)
 
   return (
-    <section className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-      <div className="flex items-center justify-between p-5">
-        <h2 className="font-display text-lg font-bold text-charcoal">Learners</h2>
+    <section className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+      <div className="flex items-center justify-between p-6">
+        <div className="flex items-center gap-3">
+          <h2 className="font-display text-lg font-bold text-charcoal">Learners</h2>
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-sprout-50 text-sprout-500 font-sans text-xs font-semibold">
+            {learners.length} shown
+          </span>
+        </div>
         <button
           type="button"
           onClick={() => navigate('/teacher/learners')}
@@ -48,17 +53,17 @@ function LearnerListTable({ sectionId = 'all' }: LearnerListTableProps) {
       <div className="overflow-x-auto">
         <table className="w-full text-left">
           <thead>
-            <tr className="border-y border-gray-100 bg-gray-50/60">
-              <th className="px-5 py-3 font-sans text-xs font-semibold text-gray-500 uppercase tracking-wide">Learner</th>
-              <th className="px-5 py-3 font-sans text-xs font-semibold text-gray-500 uppercase tracking-wide">Grade</th>
-              <th className="px-5 py-3 font-sans text-xs font-semibold text-gray-500 uppercase tracking-wide">Reading Level</th>
-              <th className="px-5 py-3 font-sans text-xs font-semibold text-gray-500 uppercase tracking-wide">Last Active</th>
+            <tr className="border-y border-gray-100 bg-paper">
+              <th className="px-6 py-3 font-sans text-xs font-semibold text-gray-500 uppercase tracking-wide">Learner</th>
+              <th className="px-6 py-3 font-sans text-xs font-semibold text-gray-500 uppercase tracking-wide">Grade</th>
+              <th className="px-6 py-3 font-sans text-xs font-semibold text-gray-500 uppercase tracking-wide">Reading Level</th>
+              <th className="px-6 py-3 font-sans text-xs font-semibold text-gray-500 uppercase tracking-wide">Last Active</th>
             </tr>
           </thead>
           <tbody>
             {learners.length === 0 ? (
               <tr>
-                <td colSpan={4} className="px-5 py-8 text-center font-sans text-sm text-gray-400">
+                <td colSpan={4} className="px-6 py-8 text-center font-sans text-sm text-gray-400">
                   No learners in this section.
                 </td>
               </tr>
@@ -67,9 +72,9 @@ function LearnerListTable({ sectionId = 'all' }: LearnerListTableProps) {
                 <tr
                   key={l.id}
                   onClick={() => navigate(`/teacher/learners/${l.id}`)}
-                  className="border-b border-gray-50 last:border-0 hover:bg-gray-50 cursor-pointer"
+                  className="border-b border-gray-50 last:border-0 hover:bg-paper cursor-pointer"
                 >
-                  <td className="px-5 py-3">
+                  <td className="px-6 py-3">
                     <div className="flex items-center gap-3">
                       <span className="w-9 h-9 rounded-full bg-sprout-50 text-sprout-500 flex items-center justify-center font-sans text-xs font-bold">
                         {l.initials}
@@ -77,9 +82,9 @@ function LearnerListTable({ sectionId = 'all' }: LearnerListTableProps) {
                       <span className="font-sans text-sm font-semibold text-charcoal">{l.name}</span>
                     </div>
                   </td>
-                  <td className="px-5 py-3 font-sans text-sm text-gray-600">{l.grade}</td>
-                  <td className="px-5 py-3"><LevelBadge level={l.level} /></td>
-                  <td className="px-5 py-3 font-sans text-sm text-gray-400">{l.lastActive}</td>
+                  <td className="px-6 py-3 font-sans text-sm text-gray-600">{l.grade}</td>
+                  <td className="px-6 py-3"><LevelBadge level={l.level} /></td>
+                  <td className="px-6 py-3 font-sans text-sm text-gray-400">{l.lastActive}</td>
                 </tr>
               ))
             )}
