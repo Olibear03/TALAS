@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import FrogMascot from '../../components/FrogMascot'
 
 interface Props {
-  learnerName: string
   onBack: () => void
   onSubmit: () => void
 }
@@ -86,7 +85,7 @@ export default function OralAssessment({ onBack, onSubmit }: Props) {
           type="button"
           onClick={handleBack}
           style={{
-            minHeight: '44px',
+            minHeight: '48px',
             fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
             fontSize: '14px',
             border: 'none',

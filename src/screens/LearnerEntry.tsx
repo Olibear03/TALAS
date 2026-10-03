@@ -98,7 +98,7 @@ export default function LearnerEntry({ onStart }: Props) {
           style={{
             width: '100%',
             minHeight: '56px',
-            background: isDisabled ? 'var(--talas-green)' : 'var(--talas-green)',
+            background: 'var(--talas-green)',
             color: 'white',
             border: 'none',
             borderRadius: '14px',

@@ -31,26 +31,15 @@ export default function CompletionScreen({ learnerName, score, totalQuestions, o
       <h1
         style={{
           margin: 0,
-          fontSize: '36px',
+          fontSize: '32px',
           fontWeight: 700,
           color: 'var(--talas-green)',
           fontFamily: "'Quicksand', system-ui, sans-serif",
+          lineHeight: 1.3,
         }}
       >
-        Mahusay! 🎉
+        Mahusay! 🎉 Natapos mo ang pagbasa.
       </h1>
-
-      {/* Sub-heading */}
-      <p
-        style={{
-          margin: 0,
-          fontSize: '22px',
-          color: 'var(--talas-charcoal)',
-          fontFamily: "'Quicksand', system-ui, sans-serif",
-        }}
-      >
-        Natapos mo ang pagbasa.
-      </p>
 
       {/* Learner name */}
       <p

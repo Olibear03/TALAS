@@ -1,0 +1,26 @@
+{
+  "id": "FEAT-001",
+  "type": "feat",
+  "description": "Replace practiceData.ts data layer: remove the catalog PracticeActivity interface and practiceActivities array; add PracticeActivityDef, PracticeProfile types; add activityRegistry with 7 entries spanning levels 1–3; add getNextPracticeActivity and updatePracticeLevel functions.",
+  "status": "completed",
+  "steps": [
+    "Open src/data/practiceData.ts. Remove the PracticeActivity interface and the practiceActivities array (they are the catalog exposed to learners).",
+    "Keep all existing exports: ActivityType, ActivityStatus, WordHelp, ComprehensionQuestion, VocabItem, WordPracticeItem, comprehensionPassage, vocabularyItems, readAloudPassage, wordPracticeItems.",
+    "Add new type aliases after the existing types block:\n  export type ActivityType = 'comprehension' | 'vocabulary' | 'read-aloud' | 'word-practice'  (already exists — leave it)\n  export interface PracticeActivityDef { id: string; title: string; type: ActivityType; level: number }\n  export interface PracticeProfile { currentLevel: number; recentScores: number[]; consecutiveHighScores: number; consecutiveLowScores: number; completedActivityIds: string[] }",
+    "Add activityRegistry: PracticeActivityDef[] with exactly these 7 entries:\n  { id: 'practice-001', title: 'Ang Munting Ibon', type: 'comprehension', level: 1 }\n  { id: 'practice-002', title: 'Hanapin ang Salita', type: 'vocabulary', level: 1 }\n  { id: 'practice-003', title: 'Basahin Natin', type: 'read-aloud', level: 1 }\n  { id: 'practice-004', title: 'Piliin ang Tamang Salita', type: 'word-practice', level: 2 }\n  { id: 'practice-005', title: 'Ang Munting Palaka', type: 'comprehension', level: 2 }\n  { id: 'practice-006', title: 'Salitang Bago', type: 'vocabulary', level: 2 }\n  { id: 'practice-007', title: 'Basahin ang Kuwento', type: 'comprehension', level: 3 }",
+    "Add export function getNextPracticeActivity(profile: PracticeProfile): PracticeActivityDef:\n  - filter activityRegistry to entries where entry.level === profile.currentLevel\n  - from those, exclude the last item of profile.completedActivityIds (if any)\n  - if filtered list is empty (all excluded), drop the exclusion and retry\n  - pick filtered[0] (deterministic)\n  - if still nothing, fall back to activityRegistry.find(a => a.level === 1)!\n  - return the selected PracticeActivityDef",
+    "Add export function updatePracticeLevel(profile: PracticeProfile, scorePercent: number, completedActivityId: string): PracticeProfile:\n  - start with spread copy of profile\n  - always: append scorePercent to recentScores (keep last 10 via slice(-10)); append completedActivityId to completedActivityIds (keep last 20 via slice(-20))\n  - if scorePercent >= 80: increment consecutiveHighScores, set consecutiveLowScores=0; if consecutiveHighScores >= 3: level up by 1 (max 3), reset consecutiveHighScores=0\n  - else if scorePercent >= 60: keep level, set consecutiveHighScores=0, consecutiveLowScores=0\n  - else (< 60): increment consecutiveLowScores, set consecutiveHighScores=0; if consecutiveLowScores >= 2: level down by 1 (min 1), reset consecutiveLowScores=0\n  - return the new profile object (do NOT mutate the parameter)"
+  ],
+  "acceptance_criteria": [
+    "practiceData.ts exports PracticeActivityDef, PracticeProfile, activityRegistry, getNextPracticeActivity, updatePracticeLevel",
+    "practiceData.ts no longer exports PracticeActivity interface or practiceActivities array",
+    "getNextPracticeActivity(profile) returns a level-matching entry and avoids repeating the last completed activity",
+    "updatePracticeLevel correctly levels up after 3 consecutive scores >= 80, levels down after 2 consecutive scores < 60, and stays level on 60–79",
+    "`npm run build` passes with no TypeScript errors after this change (PracticeLobby.tsx still references PracticeActivity at this stage — that file is deleted in FEAT-002, so build will pass once FEAT-002 is done; build may fail between FEAT-001 and FEAT-002 if PracticeLobby.tsx is not yet deleted)"
+  ],
+  "verification": [
+    "Run `npm run build` from c:\\Users\\ashai\\TALAS after FEAT-002 is also applied (FEAT-001 alone will leave PracticeLobby.tsx with a broken import; FEAT-002 deletes it). If verifying in isolation, also delete PracticeLobby.tsx first."
+  ],
+  "blocked_reason": null,
+  "findings": "PracticeLobby.tsx was deleted as part of FEAT-001 to unblock the build (it imported the removed PracticeActivity interface and practiceActivities array). The file was not tracked in git so no explicit git rm was needed. App.tsx was also updated to remove the PracticeLobby import, the 'practice-lobby' Screen union member, the practice-lobby case block, and the now-unused handleSelectActivity/activeActivityId state. One TS error encountered: 'setActiveActivityId declared but never read' (TS6133) — resolved by removing the activeActivityId state and passing a literal 'practice-001' as a temporary activityId prop. Build passed clean (0 TS errors) after these fixes."
+}

@@ -3,7 +3,6 @@ import { mockQuiz, mockPassage } from '../../data/mockData'
 import type { QuizQuestion } from '../../data/mockData'
 
 interface Props {
-  learnerName: string
   onComplete: () => void
 }
 
@@ -216,7 +215,7 @@ export default function SilentAssessment({ onComplete }: Props) {
               background: 'transparent',
               color: 'var(--talas-blue)',
               borderRadius: '12px',
-              minHeight: '44px',
+              minHeight: '48px',
               fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
               fontSize: '14px',
               padding: '0 16px',

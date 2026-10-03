@@ -12,7 +12,7 @@ export default function ComprehensionQuiz({ onComplete }: Props) {
 
   const currentQuestion = mockQuiz[currentIndex]
   const total = mockQuiz.length
-  const progressPercent = (currentIndex / total) * 100
+  const progressPercent = ((currentIndex + 1) / total) * 100
 
   const handleNext = () => {
     if (selectedChoice === null) return

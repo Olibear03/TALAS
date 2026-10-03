@@ -1,0 +1,28 @@
+{
+  "project_type": "React 19 + TypeScript + Vite + Tailwind v4 learner-facing SPA",
+  "language": "TypeScript / TSX",
+  "build_system": "Vite 8 with @vitejs/plugin-react. Build command runs tsc -b then vite build. No workspaces — single package at repo root.",
+  "test_framework": "None configured. Verification is build-only: `npm run build`.",
+  "build_command": "npm run build",
+  "test_command": "npm run build",
+  "verification_instructions": "Run `npm run build` from c:\\Users\\ashai\\TALAS. The command runs TypeScript type-checking (tsc -b) then Vite bundling. All TS errors must be zero. No unused imports allowed (ESLint is configured but build uses tsc for type errors).",
+  "snapshot_or_generated_files": null,
+  "environment_constraints": "Windows PowerShell. No running dev server to restart. Build only.",
+  "contribution_requirements": "Fix ALL TypeScript errors before reporting done. No unused imports.",
+  "key_patterns": "All styling via inline React style objects (no Tailwind classes used in practice screens — Tailwind v4 is installed but the learner screens use CSS custom properties like var(--talas-green), var(--talas-paper), var(--talas-mint), var(--talas-buttercream), var(--talas-sky), var(--talas-blue), var(--talas-coral), var(--talas-yellow), var(--talas-charcoal)). FrogMascot component accepts a `size` number prop. All screens are functional components with explicit Props interfaces. Activity components import their data directly from practiceData.ts.",
+  "relevant_files": [
+    "src/App.tsx",
+    "src/data/practiceData.ts",
+    "src/screens/learner/LearnerDashboard.tsx",
+    "src/screens/learner/LearnerAccess.tsx",
+    "src/screens/learner/PracticeLobby.tsx",
+    "src/screens/learner/FormalAssessmentCompletion.tsx",
+    "src/screens/learner/practice/PracticeActivity.tsx",
+    "src/screens/learner/practice/ComprehensionActivity.tsx",
+    "src/screens/learner/practice/VocabularyActivity.tsx",
+    "src/screens/learner/practice/ReadAloudActivity.tsx",
+    "src/screens/learner/practice/WordPracticeActivity.tsx",
+    "src/components/FrogMascot.tsx"
+  ],
+  "directory_structure": "src/App.tsx — root router (switch on Screen type string). src/data/practiceData.ts — all practice content + types. src/screens/learner/ — learner-facing screens. src/screens/learner/practice/ — individual activity components. src/components/ — shared components (FrogMascot). No test directory."
+}

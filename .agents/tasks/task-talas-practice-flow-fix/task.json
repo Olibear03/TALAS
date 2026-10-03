@@ -1,0 +1,7 @@
+{
+  "task_id": "task-talas-practice-flow-fix",
+  "task_description": "Remove the learner-facing practice activity catalog (PracticeLobby), implement adaptive mock practice logic with getNextPracticeActivity and updatePracticeLevel, wire a PracticeCompletion encouragement screen into App.tsx, and fix responsive layout across all learner screens.",
+  "status": "pending",
+  "feature_order": ["FEAT-001", "FEAT-002", "FEAT-003"],
+  "blocked_reason": null
+}
