@@ -29,13 +29,46 @@ import {
   PutCommand,
   ScanCommand,
 } from "@aws-sdk/lib-dynamodb";
+import {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+} from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 const TABLE_NAME = process.env.TALAS_TABLE ?? "talas";
 const REGION = process.env.AWS_REGION ?? "ap-southeast-2";
+const RECORDINGS_BUCKET = process.env.RECORDINGS_BUCKET ?? "talas-recordings";
 
 const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({ region: REGION }), {
   marshallOptions: { removeUndefinedValues: true },
 });
+
+const s3 = new S3Client({ region: REGION });
+
+/** How long presigned URLs stay valid (seconds). */
+const PRESIGN_EXPIRY = 900; // 15 minutes
+
+/**
+ * Presigns an S3 URL for uploading (PUT) or downloading (GET) a recording.
+ * The browser uploads the audio bytes directly to S3 with this URL, so the
+ * audio never passes through the Lambda.
+ */
+async function presign(mode, key, contentType) {
+  if (typeof key !== "string" || key.length === 0) {
+    throw new Error("Missing S3 key");
+  }
+  const command =
+    mode === "upload"
+      ? new PutObjectCommand({
+          Bucket: RECORDINGS_BUCKET,
+          Key: key,
+          ContentType: contentType || "audio/webm",
+        })
+      : new GetObjectCommand({ Bucket: RECORDINGS_BUCKET, Key: key });
+
+  return getSignedUrl(s3, command, { expiresIn: PRESIGN_EXPIRY });
+}
 
 /** CORS headers so the browser app can call the Function URL. */
 // NOTE: CORS is handled entirely by the Lambda Function URL's own CORS config
@@ -137,6 +170,20 @@ export const handler = async (event) => {
     body = typeof event.body === "string" ? JSON.parse(event.body) : event.body;
   } catch {
     return reply(400, { error: "Invalid JSON body." });
+  }
+
+  // ── Recording presign routes (S3) ──
+  // The browser calls these to get a short-lived URL for uploading/playing a
+  // voice recording directly to/from S3.
+  if (body?.action === "presign-upload" || body?.action === "presign-download") {
+    try {
+      const mode = body.action === "presign-upload" ? "upload" : "download";
+      const url = await presign(mode, body.key, body.contentType);
+      return reply(200, { url, key: body.key, expiresIn: PRESIGN_EXPIRY });
+    } catch (err) {
+      console.error("[talasFunction] presign error:", err);
+      return reply(400, { error: err.message ?? "Presign failed." });
+    }
   }
 
   const since = body?.since ?? null;
