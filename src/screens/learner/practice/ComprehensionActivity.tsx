@@ -3,7 +3,7 @@ import { comprehensionPassage } from '../../../data/practiceData'
 import type { WordHelp } from '../../../data/practiceData'
 
 interface Props {
-  onComplete: () => void
+  onComplete: (scorePercent: number) => void
   onBack: () => void
 }
 
@@ -129,7 +129,7 @@ function AnnotatedParagraph({ text, wordHelp }: { text: string; wordHelp: WordHe
 
 export default function ComprehensionActivity({ onComplete, onBack }: Props) {
   const { title, paragraphs, wordHelp, questions } = comprehensionPassage
-  const [phase, setPhase] = useState<'reading' | 'quiz' | 'done'>('reading')
+  const [phase, setPhase] = useState<'reading' | 'quiz'>('reading')
   const [qIndex, setQIndex] = useState(0)
   const [selected, setSelected] = useState<number | null>(null)
   const [answered, setAnswered] = useState(false)
@@ -148,7 +148,7 @@ export default function ComprehensionActivity({ onComplete, onBack }: Props) {
 
   const handleNext = () => {
     if (isLast) {
-      setPhase('done')
+      onComplete(Math.round((correctCount / questions.length) * 100))
     } else {
       setQIndex((q) => q + 1)
       setSelected(null)
@@ -214,81 +214,6 @@ export default function ComprehensionActivity({ onComplete, onBack }: Props) {
       </span>
     </div>
   )
-
-  // ── DONE screen ──
-  if (phase === 'done') {
-    return (
-      <div style={{ maxWidth: '600px', margin: '0 auto', minHeight: '100svh', background: 'var(--talas-paper)' }}>
-        <TopBar label={title} />
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '48px 24px',
-            gap: '20px',
-            textAlign: 'center',
-          }}
-        >
-          <div style={{ fontSize: '72px' }}>🎉</div>
-          <div
-            style={{
-              fontFamily: "'Comfortaa', system-ui, sans-serif",
-              fontSize: '28px',
-              fontWeight: 700,
-              color: 'var(--talas-green)',
-            }}
-          >
-            Mahusay!
-          </div>
-          <div
-            style={{
-              fontFamily: "'Quicksand', system-ui, sans-serif",
-              fontSize: '18px',
-              color: 'var(--talas-charcoal)',
-            }}
-          >
-            Natapos mo ang <strong>{title}</strong>.
-          </div>
-          <div
-            style={{
-              background: 'white',
-              borderRadius: '16px',
-              padding: '16px 32px',
-              border: '1px solid #E8F8EC',
-              fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
-              fontSize: '20px',
-              fontWeight: 700,
-              color: 'var(--talas-charcoal)',
-            }}
-          >
-            <span style={{ color: 'var(--talas-yellow)' }}>{correctCount}</span>
-            {' '}sa {questions.length} ang tama
-          </div>
-          <button
-            type="button"
-            onClick={onComplete}
-            style={{
-              width: '100%',
-              maxWidth: '320px',
-              minHeight: '56px',
-              background: 'var(--talas-green)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '16px',
-              fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
-              fontSize: '16px',
-              fontWeight: 700,
-              cursor: 'pointer',
-            }}
-          >
-            Bumalik sa Pagsasanay
-          </button>
-        </div>
-      </div>
-    )
-  }
 
   // ── READING phase ──
   if (phase === 'reading') {

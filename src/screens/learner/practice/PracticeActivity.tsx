@@ -5,7 +5,7 @@ import WordPracticeActivity from './WordPracticeActivity'
 
 interface Props {
   activityId: string
-  onComplete: () => void
+  onComplete: (scorePercent: number) => void
   onBack: () => void
 }
 
@@ -23,6 +23,13 @@ export default function PracticeActivity({ activityId, onComplete, onBack }: Pro
       return <ReadAloudActivity onComplete={onComplete} onBack={onBack} />
     case 'practice-004':
       return <WordPracticeActivity onComplete={onComplete} onBack={onBack} />
+    // Level 2–3 activities share MVP content with level 1 counterparts
+    case 'practice-005':
+      return <ComprehensionActivity onComplete={onComplete} onBack={onBack} />
+    case 'practice-006':
+      return <VocabularyActivity onComplete={onComplete} onBack={onBack} />
+    case 'practice-007':
+      return <ComprehensionActivity onComplete={onComplete} onBack={onBack} />
     default:
       // Unknown activity — show a friendly fallback
       return (
@@ -63,7 +70,7 @@ export default function PracticeActivity({ activityId, onComplete, onBack }: Pro
           </div>
           <button
             type="button"
-            onClick={onBack}
+            onClick={() => onComplete(0)}
             style={{
               minHeight: '56px',
               padding: '0 32px',

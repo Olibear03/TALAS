@@ -25,7 +25,7 @@ export default function App() {
     setCurrentScreen('dashboard')
   }
 
-  const handleActivityComplete = () => {
+  const handleActivityComplete = (_scorePercent: number) => {
     // Return to dashboard after finishing an activity (practice-lobby removed; FEAT-002 adds encouragement screen)
     setCurrentScreen('dashboard')
   }

@@ -2,14 +2,13 @@ import { useState } from 'react'
 import { readAloudPassage } from '../../../data/practiceData'
 
 interface Props {
-  onComplete: () => void
+  onComplete: (scorePercent: number) => void
   onBack: () => void
 }
 
 export default function ReadAloudActivity({ onComplete, onBack }: Props) {
   const { title, sentences } = readAloudPassage
   const [highlightIndex, setHighlightIndex] = useState<number | null>(null)
-  const [done, setDone] = useState(false)
   const [speaking, setSpeaking] = useState(false)
 
   const handleSpeak = (index: number, text: string) => {
@@ -121,65 +120,6 @@ export default function ReadAloudActivity({ onComplete, onBack }: Props) {
       </span>
     </div>
   )
-
-  if (done) {
-    return (
-      <div style={{ maxWidth: '600px', margin: '0 auto', minHeight: '100svh', background: 'var(--talas-paper)' }}>
-        <TopBar />
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '48px 24px',
-            gap: '20px',
-            textAlign: 'center',
-          }}
-        >
-          <div style={{ fontSize: '72px' }}>🌟</div>
-          <div
-            style={{
-              fontFamily: "'Comfortaa', system-ui, sans-serif",
-              fontSize: '28px',
-              fontWeight: 700,
-              color: 'var(--talas-green)',
-            }}
-          >
-            Napakagaling!
-          </div>
-          <div
-            style={{
-              fontFamily: "'Quicksand', system-ui, sans-serif",
-              fontSize: '18px',
-              color: 'var(--talas-charcoal)',
-            }}
-          >
-            Natapos mo ang <strong>Basahin Natin</strong>!
-          </div>
-          <button
-            type="button"
-            onClick={onComplete}
-            style={{
-              width: '100%',
-              maxWidth: '320px',
-              minHeight: '56px',
-              background: 'var(--talas-green)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '16px',
-              fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
-              fontSize: '16px',
-              fontWeight: 700,
-              cursor: 'pointer',
-            }}
-          >
-            Bumalik sa Pagsasanay
-          </button>
-        </div>
-      </div>
-    )
-  }
 
   return (
     <div style={{ maxWidth: '600px', margin: '0 auto', minHeight: '100svh', background: 'var(--talas-paper)' }}>
@@ -314,7 +254,7 @@ export default function ReadAloudActivity({ onComplete, onBack }: Props) {
         {/* Done button */}
         <button
           type="button"
-          onClick={() => setDone(true)}
+          onClick={() => onComplete(-1)}
           style={{
             width: '100%',
             minHeight: '56px',
