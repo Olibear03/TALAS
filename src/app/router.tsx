@@ -7,7 +7,6 @@ import TeacherDashboard from '../features/teacher/dashboard/TeacherDashboard'
 import LearnersList from '../features/teacher/learners/LearnersList'
 import AssessmentsList from '../features/teacher/assessment/AssessmentsList'
 import AssignAssessment from '../features/teacher/assessment/AssignAssessment'
-import PendingRecommendations from '../features/teacher/recommendation/PendingRecommendations'
 import ActivitiesList from '../features/teacher/activity/ActivitiesList'
 import ReviewAssessment from '../features/teacher/activity/ReviewAssessment'
 import Reports from '../features/teacher/reports/Reports'
@@ -82,7 +81,6 @@ export const router = createBrowserRouter([
           { path: 'new/:learnerId', element: <AssignAssessment /> },
         ],
       },
-      { path: 'recommendations', element: <PendingRecommendations /> },
       {
         path: 'activities',
         children: [

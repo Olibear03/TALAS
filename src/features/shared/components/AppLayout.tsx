@@ -1,19 +1,27 @@
 ﻿import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import {
+  Leaf,
+  LayoutDashboard,
+  Users,
+  ClipboardList,
+  BookOpen,
+  FileBarChart,
+  type LucideIcon,
+} from 'lucide-react'
 
 interface NavItem {
   to: string
   label: string
-  icon: string
+  icon: LucideIcon
   end?: boolean
 }
 
 const TEACHER_NAV: NavItem[] = [
-  { to: '/teacher', label: 'Dashboard', icon: '', end: true },
-  { to: '/teacher/learners', label: 'Learners', icon: '' },
-  { to: '/teacher/assessments', label: 'Assessments', icon: '' },
-  { to: '/teacher/recommendations', label: 'Recommendations', icon: '' },
-  { to: '/teacher/activities', label: 'Activities', icon: '' },
-  { to: '/teacher/reports', label: 'Reports', icon: '' },
+  { to: '/teacher', label: 'Dashboard', icon: LayoutDashboard, end: true },
+  { to: '/teacher/learners', label: 'Learners', icon: Users },
+  { to: '/teacher/assessments', label: 'Assessments', icon: ClipboardList },
+  { to: '/teacher/activities', label: 'Activities', icon: BookOpen },
+  { to: '/teacher/reports', label: 'Reports', icon: FileBarChart },
 ]
 
 /**
@@ -36,7 +44,7 @@ function AppLayout() {
               onClick={() => navigate('/')}
               className="flex items-center gap-2 shrink-0"
             >
-              <span className="text-xl" aria-hidden="true">🍃</span>
+              <Leaf className="w-6 h-6 text-sprout-500" aria-hidden />
               <span className="font-display text-lg font-bold text-charcoal">TALAS</span>
               <span className="hidden sm:inline font-sans text-sm text-gray-400">
                 · Basa &amp; Tuklas
@@ -48,23 +56,26 @@ function AppLayout() {
               className="hidden lg:flex items-center gap-1"
               aria-label="Teacher navigation"
             >
-              {TEACHER_NAV.map((item) => (
-                <NavLink
-                  key={item.to}
-                  to={item.to}
-                  end={item.end}
-                  className={({ isActive }) =>
-                    `flex items-center gap-2 px-3 py-2 rounded-xl font-sans text-sm font-medium transition-colors ${
-                      isActive
-                        ? 'bg-sprout-50 text-sprout-500'
-                        : 'text-gray-600 hover:bg-gray-50 hover:text-charcoal'
-                    }`
-                  }
-                >
-                  <span className="text-base" aria-hidden="true">{item.icon}</span>
-                  {item.label}
-                </NavLink>
-              ))}
+              {TEACHER_NAV.map((item) => {
+                const Icon = item.icon
+                return (
+                  <NavLink
+                    key={item.to}
+                    to={item.to}
+                    end={item.end}
+                    className={({ isActive }) =>
+                      `flex items-center gap-2 px-3 py-2 rounded-xl font-sans text-sm font-medium transition-colors ${
+                        isActive
+                          ? 'bg-sprout-50 text-sprout-500'
+                          : 'text-gray-600 hover:bg-gray-50 hover:text-charcoal'
+                      }`
+                    }
+                  >
+                    <Icon className="w-4 h-4" aria-hidden />
+                    {item.label}
+                  </NavLink>
+                )
+              })}
             </nav>
 
             <div className="flex items-center gap-3 shrink-0">
@@ -88,23 +99,26 @@ function AppLayout() {
             className="lg:hidden flex items-center gap-1 pb-2 -mt-1 overflow-x-auto"
             aria-label="Teacher navigation"
           >
-            {TEACHER_NAV.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                end={item.end}
-                className={({ isActive }) =>
-                  `flex items-center gap-2 px-3 py-2 rounded-xl font-sans text-sm font-medium whitespace-nowrap transition-colors ${
-                    isActive
-                      ? 'bg-sprout-50 text-sprout-500'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-charcoal'
-                  }`
-                }
-              >
-                <span className="text-base" aria-hidden="true">{item.icon}</span>
-                {item.label}
-              </NavLink>
-            ))}
+            {TEACHER_NAV.map((item) => {
+              const Icon = item.icon
+              return (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  end={item.end}
+                  className={({ isActive }) =>
+                    `flex items-center gap-2 px-3 py-2 rounded-xl font-sans text-sm font-medium whitespace-nowrap transition-colors ${
+                      isActive
+                        ? 'bg-sprout-50 text-sprout-500'
+                        : 'text-gray-600 hover:bg-gray-50 hover:text-charcoal'
+                    }`
+                  }
+                >
+                  <Icon className="w-4 h-4" aria-hidden />
+                  {item.label}
+                </NavLink>
+              )
+            })}
           </nav>
         </div>
       </header>

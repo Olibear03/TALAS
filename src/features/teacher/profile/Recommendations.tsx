@@ -1,5 +1,6 @@
 ﻿import { Fragment, useState } from 'react'
 import { useParams } from 'react-router-dom'
+import { Lightbulb, Bandage, Clock } from 'lucide-react'
 import {
   learnerProfile,
   type InterventionRecord,
@@ -41,7 +42,7 @@ function ProgressTrack({ record }: { record: InterventionRecord }) {
   )
 }
 
-/** Intervention History tab — active plan + previous interventions. Kept separate from formal records. */
+/** Intervention History tab — recommendations, active plan + previous interventions. Kept separate from formal records. */
 function Recommendations() {
   const { learnerId } = useParams()
   const profile = learnerProfile(learnerId)
@@ -50,13 +51,57 @@ function Recommendations() {
   if (!profile) return null
   const active = profile.intervention
   const previous = profile.interventionHistory
+  const recommendations = profile.recommendations
 
   return (
     <div className="space-y-6">
+      {/* Recommendations — system-generated next steps for this learner */}
+      <section className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 lg:p-8 space-y-4">
+        <div className="flex items-center gap-2">
+          <Lightbulb className="w-5 h-5 text-charcoal" aria-hidden />
+          <h2 className="font-display text-lg font-bold text-charcoal">Recommendations</h2>
+          <span className="ml-auto font-sans text-xs text-gray-400">
+            {recommendations.length} suggested
+          </span>
+        </div>
+
+        {recommendations.length > 0 ? (
+          <div className="space-y-3">
+            {recommendations.map((r) => (
+              <article key={r.id} className="p-4 rounded-xl bg-paper border border-gray-100 space-y-2">
+                <div className="flex items-start justify-between gap-3">
+                  <p className="font-sans text-sm font-semibold text-charcoal">{r.detail}</p>
+                  <span className="px-2 py-0.5 rounded-full bg-buttercup-50 text-buttercup-500 font-sans text-xs font-bold shrink-0">
+                    {r.status}
+                  </span>
+                </div>
+                <p className="font-sans text-xs text-gray-400">{r.basis}</p>
+                <div className="flex items-center gap-2 pt-1">
+                  <button
+                    type="button"
+                    className="h-9 px-4 rounded-lg bg-sprout-500 hover:opacity-95 text-white font-sans text-sm font-semibold transition-all shadow-sm"
+                  >
+                    Approve
+                  </button>
+                  <button
+                    type="button"
+                    className="h-9 px-4 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 text-charcoal font-sans text-sm font-semibold transition-colors"
+                  >
+                    Dismiss
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <p className="font-sans text-sm text-gray-400">No recommendations for this learner right now.</p>
+        )}
+      </section>
+
       {/* Current / active intervention */}
       <section className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 lg:p-8 space-y-5">
         <div className="flex items-center gap-2">
-          <span className="text-lg" aria-hidden="true">🩹</span>
+          <Bandage className="w-5 h-5 text-charcoal" aria-hidden />
           <h2 className="font-display text-lg font-bold text-charcoal">Current Intervention</h2>
           {active && <span className="ml-auto"><StatusBadge status={active.status} /></span>}
         </div>
@@ -94,7 +139,7 @@ function Recommendations() {
       {/* Previous interventions */}
       <section className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
         <div className="flex items-center gap-2 px-6 py-4">
-          <span className="text-lg" aria-hidden="true">🕑</span>
+          <Clock className="w-5 h-5 text-charcoal" aria-hidden />
           <h2 className="font-display text-base font-bold text-charcoal">Previous Interventions</h2>
           <span className="ml-auto font-sans text-xs text-gray-400">{previous.length} on record</span>
         </div>

@@ -1,22 +1,34 @@
 ﻿import { Fragment, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
+  Mic,
+  BookOpenCheck,
+  Lock,
+  Clock,
+  Settings,
+  ShieldCheck,
+  Plus,
+  ClipboardList,
+  type LucideIcon,
+} from 'lucide-react'
+import {
   learnerProfile,
   crlaLabel,
   type FormalAssessmentRecord,
   type FormalAssessmentType,
 } from '../dashboard/sectionData'
 
-const TYPE_META: Record<FormalAssessmentType, { icon: string; chip: string; desc: string }> = {
-  Oral: { icon: '🎙️', chip: 'bg-coral-50 text-coral-500', desc: 'Read-aloud · miscue & fluency' },
-  Silent: { icon: '📖', chip: 'bg-sky-50 text-sky-500', desc: 'Silent reading · comprehension' },
+const TYPE_META: Record<FormalAssessmentType, { icon: LucideIcon; chip: string; desc: string }> = {
+  Oral: { icon: Mic, chip: 'bg-coral-50 text-coral-500', desc: 'Read-aloud · miscue & fluency' },
+  Silent: { icon: BookOpenCheck, chip: 'bg-sky-50 text-sky-500', desc: 'Silent reading · comprehension' },
 }
 
 function TypeBadge({ type }: { type: FormalAssessmentType }) {
   const meta = TYPE_META[type]
+  const TypeIcon = meta.icon
   return (
     <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full font-sans text-xs font-bold ${meta.chip}`}>
-      <span aria-hidden="true">{meta.icon}</span>
+      <TypeIcon className="w-4 h-4" aria-hidden />
       {type}
     </span>
   )
@@ -25,7 +37,7 @@ function TypeBadge({ type }: { type: FormalAssessmentType }) {
 function FinalizedBadge() {
   return (
     <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-sprout-50 text-sprout-500 font-sans text-xs font-bold">
-      🔒 Finalized
+      <Lock className="w-3.5 h-3.5" aria-hidden /> Finalized
     </span>
   )
 }
@@ -62,6 +74,57 @@ function RecordDetail({ record }: { record: FormalAssessmentRecord }) {
   )
 }
 
+const TYPE_ORDER: FormalAssessmentType[] = ['Oral', 'Silent']
+
+/** Segmented slider control for switching between Oral and Silent records. */
+function TypeSlider({
+  value,
+  available,
+  onChange,
+}: {
+  value: FormalAssessmentType
+  available: Set<FormalAssessmentType>
+  onChange: (type: FormalAssessmentType) => void
+}) {
+  const activeIndex = TYPE_ORDER.indexOf(value)
+  return (
+    <div
+      role="tablist"
+      aria-label="Formal assessment type"
+      className="relative inline-flex items-center p-1 rounded-full bg-paper border border-gray-200"
+    >
+      {/* Sliding highlight pill */}
+      <span
+        aria-hidden="true"
+        className="absolute top-1 bottom-1 w-[calc(50%-0.25rem)] rounded-full bg-white shadow-sm border border-gray-200 transition-transform duration-300 ease-out"
+        style={{ transform: `translateX(${activeIndex * 100}%)` }}
+      />
+      {TYPE_ORDER.map((type) => {
+        const meta = TYPE_META[type]
+        const TypeIcon = meta.icon
+        const isActive = value === type
+        const isAvailable = available.has(type)
+        return (
+          <button
+            key={type}
+            type="button"
+            role="tab"
+            aria-selected={isActive}
+            disabled={!isAvailable}
+            onClick={() => isAvailable && onChange(type)}
+            className={`relative z-10 inline-flex items-center justify-center gap-1.5 w-22 py-1.5 rounded-full font-sans text-xs font-bold transition-colors ${
+              isActive ? 'text-charcoal' : 'text-gray-400 hover:text-gray-600'
+            } ${!isAvailable ? 'opacity-40 cursor-not-allowed hover:text-gray-400' : ''}`}
+          >
+            <TypeIcon className="w-4 h-4" aria-hidden />
+            {type}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
 /** Formal Assessments tab — finalized, read-only CRLA records with history. */
 function FormalAssessment() {
   const { learnerId } = useParams()
@@ -69,26 +132,32 @@ function FormalAssessment() {
   const profile = learnerProfile(learnerId)
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
+  const history = profile?.formalHistory ?? []
+  const latest = history[0] ?? null
+  const [activeType, setActiveType] = useState<FormalAssessmentType>(latest?.type ?? 'Oral')
+
   if (!profile) return null
 
-  const history = profile.formalHistory
-  const latest = history[0] ?? null
   const previous = history.slice(1)
+
+  // Latest record of the currently-selected type (falls back to overall latest).
+  const availableTypes = new Set(history.map((r) => r.type))
+  const selected = history.find((r) => r.type === activeType) ?? latest
 
   return (
     <div className="space-y-6">
       {/* 1. LATEST FORMAL ASSESSMENT */}
       <section className="bg-white rounded-2xl border-2 border-sprout-500/30 shadow-sm overflow-hidden">
         <div className="flex flex-wrap items-center gap-2 px-6 py-3 bg-sprout-50 border-b border-sprout-500/20">
-          <span className="text-lg" aria-hidden="true">🔒</span>
+          <Lock className="w-5 h-5 text-charcoal" aria-hidden />
           <h2 className="font-display text-base font-bold text-charcoal">Latest Formal Assessment</h2>
           <div className="ml-auto flex items-center gap-2">
-            {latest && <TypeBadge type={latest.type} />}
+            <TypeSlider value={activeType} available={availableTypes} onChange={setActiveType} />
             <FinalizedBadge />
           </div>
         </div>
 
-        {latest ? (
+        {selected ? (
           <div className="p-6 space-y-5">
             <div className="flex flex-wrap items-center gap-3">
               <span className="font-display text-3xl font-bold text-charcoal">
@@ -98,15 +167,16 @@ function FormalAssessment() {
                 {crlaLabel(profile.record.level)}
               </span>
               <span className="font-sans text-sm text-gray-500">
-                {TYPE_META[latest.type].desc} · {latest.dateFinalized}
+                {TYPE_META[selected.type].desc} · {selected.dateFinalized}
               </span>
             </div>
 
-            <RecordDetail record={latest} />
+            <RecordDetail record={selected} />
 
             <p className="font-sans text-xs text-gray-400 flex items-center gap-1.5">
-              🛡️ Locked evidence — this finalized record is read-only. Practice sessions and daily
-              activities do not overwrite it.
+              <ShieldCheck className="w-3.5 h-3.5 shrink-0" aria-hidden /> Locked evidence — this
+              finalized record is read-only. Practice sessions and daily activities do not
+              overwrite it.
             </p>
           </div>
         ) : (
@@ -117,7 +187,7 @@ function FormalAssessment() {
       {/* 2. ASSESSMENT HISTORY */}
       <section className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
         <div className="flex items-center gap-2 px-6 py-4">
-          <span className="text-lg" aria-hidden="true">🕑</span>
+          <Clock className="w-5 h-5 text-charcoal" aria-hidden />
           <h2 className="font-display text-base font-bold text-charcoal">Assessment History</h2>
           <span className="ml-auto font-sans text-xs text-gray-400">{history.length} on record</span>
         </div>
@@ -181,7 +251,7 @@ function FormalAssessment() {
       {/* 3. ASSESSMENT ACTIONS */}
       <section className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-4">
         <div className="flex items-center gap-2">
-          <span className="text-lg" aria-hidden="true">⚙️</span>
+          <Settings className="w-5 h-5 text-charcoal" aria-hidden />
           <h2 className="font-display text-base font-bold text-charcoal">Assessment Actions</h2>
         </div>
 
@@ -191,14 +261,14 @@ function FormalAssessment() {
             onClick={() => navigate(`/teacher/assessments/new/${profile.record.id}`)}
             className="h-11 px-5 rounded-xl bg-sprout-500 hover:opacity-95 text-white font-sans text-sm font-semibold inline-flex items-center gap-2 transition-all shadow-sm"
           >
-            ➕ Start / assign new formal assessment
+            <Plus className="w-4 h-4" aria-hidden /> Start / assign new formal assessment
           </button>
           <button
             type="button"
             onClick={() => navigate('/teacher/assessments')}
             className="h-11 px-4 rounded-xl bg-paper border border-gray-200 hover:bg-gray-50 text-charcoal font-sans text-sm font-semibold inline-flex items-center gap-2 transition-colors"
           >
-            📋 View all assessments
+            <ClipboardList className="w-4 h-4" aria-hidden /> View all assessments
           </button>
         </div>
         <p className="font-sans text-xs text-gray-400">

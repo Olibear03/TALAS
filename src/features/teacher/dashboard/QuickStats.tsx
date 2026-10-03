@@ -1,4 +1,5 @@
-﻿import { useDashboardStats } from './useDashboardStats'
+﻿import { BarChart3, TriangleAlert, Headphones } from 'lucide-react'
+import { useDashboardStats } from './useDashboardStats'
 
 interface QuickStatsProps {
   sectionId?: string
@@ -54,7 +55,7 @@ function QuickStats({ sectionId = 'all' }: QuickStatsProps) {
           <ProgressRing pct={assessedPct} />
         </div>
         <div className="mt-4 pt-3 border-t border-gray-100 flex items-center gap-1.5">
-          <span className="text-sprout-500" aria-hidden="true">📊</span>
+          <BarChart3 className="w-4 h-4 text-sprout-500" aria-hidden />
           <span className="font-sans text-xs text-gray-500">{assessedPct}% completion rate</span>
         </div>
       </article>
@@ -77,39 +78,43 @@ function QuickStats({ sectionId = 'all' }: QuickStatsProps) {
             </div>
             <p className="font-sans text-xs text-gray-500">MR + FR learners</p>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-coral-50 flex items-center justify-center text-xl shrink-0" aria-hidden="true">
-            ⚠️
+          <div className="w-12 h-12 rounded-xl bg-coral-50 flex items-center justify-center shrink-0" aria-hidden="true">
+            <TriangleAlert className="w-6 h-6 text-coral-500" aria-hidden />
           </div>
         </div>
         <div className="mt-4 pt-3 flex items-center gap-1.5 bg-coral-50 rounded-lg px-2.5 py-1.5">
-          <span className="text-coral-500" aria-hidden="true">🎧</span>
+          <Headphones className="w-4 h-4 text-coral-500" aria-hidden />
           <span className="font-sans text-xs text-coral-500 font-medium truncate">
             Requires targeted intervention
           </span>
         </div>
       </article>
 
-      {/* Active Today */}
+      {/* Needs Review */}
       <article className="relative overflow-hidden rounded-2xl bg-white border border-gray-200 p-5 shadow-sm transition-all hover:shadow-md">
         <div className="flex items-start justify-between gap-3">
           <div className="space-y-1">
             <span className="font-sans text-xs font-semibold uppercase tracking-wider text-gray-400">
-              Active Today
+              Needs Review
             </span>
             <div className="font-sans text-2xl font-bold text-charcoal pt-1">
-              {stats.activeTodayCount}{' '}
-              <span className="font-sans text-base font-semibold text-sprout-500">learners</span>
+              {stats.needsReviewCount}{' '}
+              <span className="font-sans text-base font-semibold text-coral-500">
+                {stats.needsReviewCount === 1 ? 'assessment' : 'assessments'}
+              </span>
             </div>
-            <p className="font-sans text-xs text-gray-500">in the last 24 hours</p>
+            <p className="font-sans text-xs text-gray-500">awaiting your review</p>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-sprout-50 flex items-center justify-center text-xl shrink-0" aria-hidden="true">
-            ⚡
+          <div className="w-12 h-12 rounded-xl bg-coral-50 flex items-center justify-center shrink-0" aria-hidden="true">
+            <Headphones className="w-6 h-6 text-coral-500" aria-hidden />
           </div>
         </div>
         <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between">
-          <span className="font-sans text-xs text-gray-400">Total in view</span>
-          <span className="font-sans text-xs text-sprout-500 font-semibold">
-            {stats.totalLearners} learners
+          <span className="font-sans text-xs text-gray-400">
+            {stats.needsReviewCount === 0 ? 'All caught up' : 'More to review'}
+          </span>
+          <span className="font-sans text-xs text-coral-500 font-semibold">
+            {stats.needsReviewCount} pending
           </span>
         </div>
       </article>

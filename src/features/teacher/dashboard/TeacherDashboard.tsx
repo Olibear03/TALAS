@@ -2,7 +2,6 @@
 import DashboardHeader from './DashboardHeader'
 import SectionSelector from './SectionSelector'
 import QuickStats from './QuickStats'
-import PendingActions from './PendingActions'
 import ClassDistribution from './ClassDistribution'
 import RecentActivity from './RecentActivity'
 import LearnerListTable from './LearnerListTable'
@@ -36,24 +35,12 @@ function TeacherDashboard() {
         {/* Two-column grid: 8 / 4 */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
           <div className="lg:col-span-8 space-y-6">
-            <PendingActions />
             <ClassDistribution sectionId={sectionId} />
             <LearnerListTable sectionId={sectionId} />
           </div>
 
           <aside className="lg:col-span-4 space-y-6">
             <RecentActivity />
-
-            <div className="rounded-2xl bg-sky-50 p-5 space-y-2">
-              <div className="flex items-center gap-2 text-sky-500 font-sans text-sm font-bold">
-                <span aria-hidden="true">📖</span>
-                <span>Phil-IRI Strategy Note</span>
-              </div>
-              <p className="font-reading text-sm text-charcoal/70 leading-relaxed">
-                Prioritize phoneme blending check-ins for emergent readers before
-                moving them to multi-syllabic passages in Week 6.
-              </p>
-            </div>
           </aside>
         </div>
       </div>

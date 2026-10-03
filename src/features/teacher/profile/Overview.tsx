@@ -1,17 +1,17 @@
 ﻿import { useParams } from 'react-router-dom'
+import { Lock, Sparkles, Bandage, Clock, Check, ShieldCheck, type LucideIcon } from 'lucide-react'
 import {
   learnerProfile,
-  crlaLabel,
   type RecentActivityItem,
 } from '../dashboard/sectionData'
 
 const ACTIVITY_META: Record<
   RecentActivityItem['type'],
-  { icon: string; chip: string }
+  { icon: LucideIcon; chip: string }
 > = {
-  'Formal Assessment': { icon: '🔒', chip: 'bg-sprout-50 text-sprout-500' },
-  Practice: { icon: '✨', chip: 'bg-sky-50 text-sky-500' },
-  Intervention: { icon: '🩹', chip: 'bg-buttercup-50 text-buttercup-500' },
+  'Formal Assessment': { icon: Lock, chip: 'bg-sprout-50 text-sprout-500' },
+  Practice: { icon: Sparkles, chip: 'bg-sky-50 text-sky-500' },
+  Intervention: { icon: Bandage, chip: 'bg-buttercup-50 text-buttercup-500' },
 }
 
 /** Overview tab — current reading situation across formal, practice, and intervention. */
@@ -20,7 +20,7 @@ function Overview() {
   const profile = learnerProfile(learnerId)
 
   if (!profile) return null
-  const { record, formal, practice, intervention, recentActivity } = profile
+  const { formal, practice, intervention, recentActivity } = profile
 
   return (
     <div className="space-y-6">
@@ -29,32 +29,18 @@ function Overview() {
       {/* ------------------------------------------------------------ */}
       <section className="bg-white rounded-2xl border-2 border-sprout-500/30 shadow-sm overflow-hidden">
         <div className="flex items-center gap-2 px-6 py-3 bg-sprout-50 border-b border-sprout-500/20">
-          <span className="text-lg" aria-hidden="true">🔒</span>
+          <Lock className="w-5 h-5 text-charcoal" aria-hidden />
           <h2 className="font-display text-base font-bold text-charcoal">
             Formal Assessment Snapshot
           </h2>
           <span className="ml-auto inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white text-sprout-500 font-sans text-xs font-bold">
-            ✓ Finalized official record
+            <Check className="w-3.5 h-3.5" aria-hidden /> Finalized official record
           </span>
         </div>
 
         {formal ? (
           <div className="p-6 space-y-5">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-paper border border-gray-100 rounded-xl p-4 space-y-1">
-                <span className="font-sans text-xs text-gray-400 uppercase tracking-wide">
-                  Formal reading level
-                </span>
-                <div className="flex items-center gap-2">
-                  <span className="font-display text-2xl font-bold text-charcoal">
-                    {record.level ?? '—'}
-                  </span>
-                  <span className="inline-flex px-2 py-0.5 rounded-full bg-crla-fr/15 text-crla-fr font-sans text-xs font-bold">
-                    {crlaLabel(record.level)}
-                  </span>
-                </div>
-                <p className="font-sans text-sm text-gray-600">{formal.readerStage}</p>
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
               <div className="bg-paper border border-gray-100 rounded-xl p-4 space-y-1">
                 <span className="font-sans text-xs text-gray-400 uppercase tracking-wide">
@@ -86,8 +72,9 @@ function Overview() {
             </div>
 
             <p className="font-sans text-xs text-gray-400 flex items-center gap-1.5">
-              🛡️ Locked evidence — classification: {formal.classification}. Practice sessions do
-              not overwrite this baseline.
+              <ShieldCheck className="w-3.5 h-3.5 shrink-0" aria-hidden /> Locked evidence —
+              classification: {formal.classification}. Practice sessions do not overwrite this
+              baseline.
             </p>
           </div>
         ) : (
@@ -102,7 +89,7 @@ function Overview() {
       {/* ------------------------------------------------------------ */}
       <section className="bg-white rounded-2xl border border-dashed border-sky-500/40 shadow-sm overflow-hidden">
         <div className="flex items-center gap-2 px-6 py-3 bg-sky-50 border-b border-sky-500/20">
-          <span className="text-lg" aria-hidden="true">✨</span>
+          <Sparkles className="w-5 h-5 text-charcoal" aria-hidden />
           <h2 className="font-display text-base font-bold text-charcoal">Current Practice</h2>
           <span className="ml-auto inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white text-sky-500 font-sans text-xs font-bold">
             Adaptive · not a formal record
@@ -123,35 +110,6 @@ function Overview() {
               </span>
             </div>
 
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="font-sans text-sm font-semibold text-charcoal">
-                  Recent practice performance
-                </span>
-                <span className="font-sans text-xs text-gray-400">Last 3 sessions</span>
-              </div>
-              <div className="grid grid-cols-3 gap-3">
-                {practice.recentAccuracy.map((s) => (
-                  <div
-                    key={s.label}
-                    className="flex flex-col items-center gap-2 p-3 bg-paper border border-gray-100 rounded-xl"
-                  >
-                    <div className="w-full flex items-end justify-center h-20 bg-white rounded-lg p-1.5">
-                      <div
-                        className="w-full bg-sky-500 rounded-md transition-all duration-500"
-                        style={{ height: `${s.pct}%` }}
-                      />
-                    </div>
-                    <div className="text-center">
-                      <span className="font-display text-base font-bold text-charcoal">
-                        {s.pct}%
-                      </span>
-                      <p className="font-sans text-xs text-gray-400">{s.label}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
 
             <p className="font-sans text-xs text-gray-500 bg-sky-50/60 rounded-lg px-3 py-2">
               {practice.note}
@@ -171,7 +129,7 @@ function Overview() {
         {/* Intervention */}
         <section className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-4">
           <div className="flex items-center gap-2">
-            <span className="text-lg" aria-hidden="true">🩹</span>
+            <Bandage className="w-5 h-5 text-charcoal" aria-hidden />
             <h2 className="font-display text-base font-bold text-charcoal">Intervention</h2>
           </div>
 
@@ -224,7 +182,7 @@ function Overview() {
         {/* Recent Activity */}
         <section className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-4">
           <div className="flex items-center gap-2">
-            <span className="text-lg" aria-hidden="true">🕑</span>
+            <Clock className="w-5 h-5 text-charcoal" aria-hidden />
             <h2 className="font-display text-base font-bold text-charcoal">Recent Activity</h2>
           </div>
 
@@ -232,16 +190,17 @@ function Overview() {
             <ul className="flex flex-col gap-2">
               {recentActivity.map((a, i) => {
                 const meta = ACTIVITY_META[a.type]
+                const MetaIcon = meta.icon
                 return (
                   <li
                     key={`${a.date}-${i}`}
                     className="flex items-start gap-3 p-3 rounded-xl bg-paper border border-gray-100"
                   >
                     <span
-                      className="w-8 h-8 rounded-lg bg-white flex items-center justify-center shrink-0"
+                      className="w-8 h-8 rounded-lg bg-white flex items-center justify-center shrink-0 text-charcoal"
                       aria-hidden="true"
                     >
-                      {meta.icon}
+                      <MetaIcon className="w-4 h-4" aria-hidden />
                     </span>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-2">
