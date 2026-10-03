@@ -2,7 +2,7 @@
 import {
   learnerProfile,
   type PracticeTrend,
-} from '../../../features/teacher/dashboard/sectionData'
+} from '../dashboard/sectionData'
 
 const TREND_META: Record<PracticeTrend, { icon: string; chip: string }> = {
   Improving: { icon: '📈', chip: 'bg-sprout-50 text-sprout-500' },

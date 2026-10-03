@@ -4,7 +4,7 @@ import {
   learnerProfile,
   type InterventionRecord,
   type InterventionStatus,
-} from '../../../features/teacher/dashboard/sectionData'
+} from '../dashboard/sectionData'
 
 const STATUS_META: Record<InterventionStatus, string> = {
   Active: 'bg-sprout-50 text-sprout-500',

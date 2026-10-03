@@ -3,7 +3,7 @@ import {
   learnerProfile,
   crlaLabel,
   type RecentActivityItem,
-} from '../../../features/teacher/dashboard/sectionData'
+} from '../dashboard/sectionData'
 
 const ACTIVITY_META: Record<
   RecentActivityItem['type'],

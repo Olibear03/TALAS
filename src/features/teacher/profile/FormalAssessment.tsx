@@ -5,7 +5,7 @@ import {
   crlaLabel,
   type FormalAssessmentRecord,
   type FormalAssessmentType,
-} from '../../../features/teacher/dashboard/sectionData'
+} from '../dashboard/sectionData'
 
 const TYPE_META: Record<FormalAssessmentType, { icon: string; chip: string; desc: string }> = {
   Oral: { icon: '🎙️', chip: 'bg-coral-50 text-coral-500', desc: 'Read-aloud · miscue & fluency' },

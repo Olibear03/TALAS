@@ -1,5 +1,5 @@
 ﻿import { useNavigate } from 'react-router-dom'
-import { LEARNERS, crlaLabel } from '../../features/teacher/dashboard/sectionData'
+import { LEARNERS, crlaLabel } from '../dashboard/sectionData'
 
 /** Teacher learner directory. Rows link to the learner profile. */
 function LearnersList() {
