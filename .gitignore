@@ -23,7 +23,15 @@ dist-ssr
 *.sln
 *.sw?
 
+# Backend Lambda build artifacts
+backend/node_modules
+backend/talasFunction.zip
+
 # amplify
 .amplify
 amplify_outputs*
 amplifyconfiguration*
+
+# env
+.env
+.env.local
