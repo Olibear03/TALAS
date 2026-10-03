@@ -1,18 +1,32 @@
 import { useState } from 'react'
-import LearnerAccess from './screens/learner/LearnerAccess'
-import LearnerDashboard from './screens/learner/LearnerDashboard'
-import OralAssessment from './screens/learner/OralAssessment'
-import OralCompletion from './screens/learner/OralCompletion'
-import SilentAssessment from './screens/learner/SilentAssessment'
-import FormalAssessmentCompletion from './screens/learner/FormalAssessmentCompletion'
-import PracticeActivity from './screens/learner/practice/PracticeActivity'
-import PracticeCompletion from './screens/learner/PracticeCompletion'
-import { getNextPracticeActivity, updatePracticeLevel } from './data/practiceData'
-import type { PracticeProfile, PracticeActivityDef } from './data/practiceData'
-import type { OralResult } from './screens/learner/OralAssessment'
+import { useNavigate } from 'react-router-dom'
+import LearnerDashboard from '../../screens/learner/LearnerDashboard'
+import OralAssessment from '../../screens/learner/OralAssessment'
+import OralCompletion from '../../screens/learner/OralCompletion'
+import SilentAssessment from '../../screens/learner/SilentAssessment'
+import FormalAssessmentCompletion from '../../screens/learner/FormalAssessmentCompletion'
+import PracticeActivity from '../../screens/learner/practice/PracticeActivity'
+import PracticeCompletion from '../../screens/learner/PracticeCompletion'
+import {
+  getNextPracticeActivity,
+  updatePracticeLevel,
+} from '../../data/practiceData'
+import type {
+  PracticeProfile,
+  PracticeActivityDef,
+} from '../../data/practiceData'
+import type { OralResult } from '../../screens/learner/OralAssessment'
 
+/**
+ * Learner experience, mounted at `/learner` from Oliver's router. This hosts
+ * the real reading-assessment flow (speech recognition, scoring, timestamps,
+ * S3 recording upload, IndexedDB persistence). The first app page is still
+ * Oliver's RoleSelector at `/`; picking "I'm a Learner" routes here.
+ *
+ * Internally this is a simple screen switch (not nested routes), which keeps
+ * the self-contained assessment flow intact as it was built and tested.
+ */
 type Screen =
-  | 'learner-access'
   | 'dashboard'
   | 'oral-assessment'
   | 'oral-completion'
@@ -21,9 +35,10 @@ type Screen =
   | 'practice-activity'
   | 'practice-completion'
 
-export default function App() {
-  const [currentScreen, setCurrentScreen] = useState<Screen>('learner-access')
-  const [learnerName, setLearnerName] = useState<string>('')
+export default function LearnerApp() {
+  const navigate = useNavigate()
+  const [currentScreen, setCurrentScreen] = useState<Screen>('dashboard')
+  const [learnerName] = useState<string>('Maria')
   const [practiceProfile, setPracticeProfile] = useState<PracticeProfile>({
     currentLevel: 2,
     recentScores: [],
@@ -34,12 +49,10 @@ export default function App() {
   const [activeActivityId, setActiveActivityId] = useState<string>('')
   const [lastActivityTitle, setLastActivityTitle] = useState<string>('')
   const [lastScorePercent, setLastScorePercent] = useState<number>(0)
-  const [oralResult, setOralResult] = useState<OralResult | null>(null)
-
-  const handleAccess = (name: string) => {
-    setLearnerName(name)
-    setCurrentScreen('dashboard')
-  }
+  const [, setOralResult] = useState<OralResult | null>(null)
+  const [oralResultForView, setOralResultForView] = useState<OralResult | null>(
+    null,
+  )
 
   const handleStartPractice = () => {
     const act: PracticeActivityDef = getNextPracticeActivity(practiceProfile)
@@ -49,7 +62,11 @@ export default function App() {
   }
 
   const handleActivityComplete = (scorePercent: number) => {
-    const updated = updatePracticeLevel(practiceProfile, scorePercent, activeActivityId)
+    const updated = updatePracticeLevel(
+      practiceProfile,
+      scorePercent,
+      activeActivityId,
+    )
     setPracticeProfile(updated)
     setLastScorePercent(scorePercent)
     setCurrentScreen('practice-completion')
@@ -63,15 +80,13 @@ export default function App() {
   }
 
   switch (currentScreen) {
-    case 'learner-access':
-      return <LearnerAccess onAccess={handleAccess} />
     case 'dashboard':
       return (
         <LearnerDashboard
           learnerName={learnerName}
           onStartAssessment={() => setCurrentScreen('oral-assessment')}
           onStartPractice={handleStartPractice}
-          onGoToProfile={() => alert('Profile — malapit na!')}
+          onGoToProfile={() => navigate('/')}
         />
       )
     case 'oral-assessment':
@@ -80,6 +95,7 @@ export default function App() {
           onBack={() => setCurrentScreen('dashboard')}
           onSubmit={(result) => {
             setOralResult(result)
+            setOralResultForView(result)
             setCurrentScreen('oral-completion')
           }}
         />
@@ -87,13 +103,15 @@ export default function App() {
     case 'oral-completion':
       return (
         <OralCompletion
-          result={oralResult}
+          result={oralResultForView}
           onContinue={() => setCurrentScreen('silent-assessment')}
         />
       )
     case 'silent-assessment':
       return (
-        <SilentAssessment onComplete={() => setCurrentScreen('formal-completion')} />
+        <SilentAssessment
+          onComplete={() => setCurrentScreen('formal-completion')}
+        />
       )
     case 'formal-completion':
       return (

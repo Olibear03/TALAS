@@ -1,0 +1,28 @@
+﻿import { useNavigate, useParams } from 'react-router-dom'
+
+/** Review a submitted learner activity. */
+function ReviewAssessment() {
+  const navigate = useNavigate()
+  const { activityId } = useParams()
+
+  return (
+    <div className="space-y-6">
+      <button
+        type="button"
+        onClick={() => navigate('/teacher/activities')}
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 font-sans text-sm text-charcoal transition-colors"
+      >
+        ← Back to Activities
+      </button>
+      <header className="flex flex-col gap-1">
+        <h1 className="font-display text-2xl font-bold text-charcoal">Review Activity</h1>
+        <p className="font-sans text-sm text-gray-500">Review submission for activity {activityId}.</p>
+      </header>
+      <div className="bg-white rounded-2xl border border-gray-200 p-6 font-reading text-gray-500">
+        Review interface to be added.
+      </div>
+    </div>
+  )
+}
+
+export default ReviewAssessment

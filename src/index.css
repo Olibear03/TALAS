@@ -1,8 +1,54 @@
-@import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Quicksand:wght@400;500;600;700&display=swap');
-@import 'tailwindcss';
+﻿@import 'tailwindcss';
+@import './styles/variables.css';
 
+/* ------------------------------------------------------------------ */
+/* Tailwind v4 theme tokens — maps the TALAS palette + fonts to        */
+/* utility classes (bg-sprout-500, text-charcoal, font-display, etc.). */
+/* ------------------------------------------------------------------ */
+@theme {
+  --color-sprout-500: #4bae4f;
+  --color-sprout-50: #e8f8ec;
+  --color-buttercup-500: #ffb82e;
+  --color-buttercup-50: #fff9e6;
+  --color-sky-500: #5d87e6;
+  --color-sky-50: #ebf2ff;
+  --color-coral-500: #e66345;
+  --color-coral-50: #fdecE8;
+  --color-paper: #fafdf8;
+  --color-charcoal: #242923;
+
+  /* CRLA reading-level colors */
+  --color-crla-gr: #4bae4f;
+  --color-crla-lr: #ffb82e;
+  --color-crla-mr: #f97316;
+  --color-crla-fr: #e66345;
+
+  --font-display: 'Comfortaa', system-ui, sans-serif;
+  --font-reading: 'Quicksand', system-ui, sans-serif;
+  --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--color-paper, #fafdf8);
+  color: var(--color-charcoal, #242923);
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* ------------------------------------------------------------------ */
+/* TALAS learner-screen tokens (from the reading-assessment screens).  */
+/* These --talas-* vars are consumed by src/screens/* and              */
+/* src/components/ReadingAssessment.* — kept so those screens render    */
+/* correctly alongside Oliver's Tailwind @theme utilities.             */
+/* ------------------------------------------------------------------ */
 :root {
-  /* Learner UI tokens (from shai-learner-ui) */
   --talas-paper: #fafdf8;
   --talas-green: #4bae4f;
   --talas-yellow: #ffb82e;
@@ -15,7 +61,7 @@
   --talas-buttercream: #fff9e6;
   --talas-sky: #ebf2ff;
 
-  /* Shared TALAS palette (used by ReadingAssessment + reading logic UI) */
+  /* Shared aliases used by ReadingAssessment.css */
   --sprout: #4bae4f;
   --sprout-dark: #3d9140;
   --buttercup: #ffb82e;
@@ -28,48 +74,7 @@
   --ink: #242923;
   --ink-muted: #5c6358;
   --line: #e3ebe0;
-
-  /* Typography roles */
-  --font-display: 'Comfortaa', system-ui, sans-serif;
-  --font-reading: 'Quicksand', system-ui, sans-serif;
   --font-ui: 'Plus Jakarta Sans', system-ui, sans-serif;
-
   --shadow-card: 0 12px 28px -12px rgba(36, 41, 35, 0.18);
   --shadow-soft: 0 6px 18px -8px rgba(36, 41, 35, 0.14);
-}
-
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  background: var(--talas-paper);
-  color: var(--talas-charcoal);
-  font-family: 'Quicksand', system-ui, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-#root {
-  width: 100%;
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-}
-
-.font-quicksand {
-  font-family: 'Quicksand', system-ui, sans-serif;
-}
-.font-comfortaa {
-  font-family: 'Comfortaa', system-ui, sans-serif;
-}
-.font-jakarta {
-  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-}
-
-p {
-  margin: 0;
 }
