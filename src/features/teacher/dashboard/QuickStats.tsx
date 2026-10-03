@@ -7,8 +7,12 @@ interface StatCard {
   sublabel: string
 }
 
-function QuickStats() {
-  const stats = useDashboardStats()
+interface QuickStatsProps {
+  sectionId?: string
+}
+
+function QuickStats({ sectionId = 'all' }: QuickStatsProps) {
+  const stats = useDashboardStats(sectionId)
 
   const assessedPct =
     stats.totalLearners > 0
@@ -20,7 +24,7 @@ function QuickStats() {
       icon: '👥',
       value: String(stats.totalLearners),
       label: 'Total Learners',
-      sublabel: 'in your class',
+      sublabel: sectionId === 'all' ? 'across all sections' : 'in this section',
     },
     {
       icon: '📊',
