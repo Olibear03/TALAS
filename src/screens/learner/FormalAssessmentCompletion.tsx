@@ -15,8 +15,8 @@ export default function FormalAssessmentCompletion({ learnerName, onDone }: Prop
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        padding: '32px 16px',
-        maxWidth: '480px',
+        padding: 'clamp(12px, 4vw, 32px)',
+        width: 'min(520px, 100%)',
         margin: '0 auto',
       }}
     >

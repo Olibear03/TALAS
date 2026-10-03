@@ -89,9 +89,9 @@ export default function VocabularyActivity({ onComplete, onBack }: Props) {
   )
 
   return (
-    <div style={{ maxWidth: '600px', margin: '0 auto', minHeight: '100svh', background: 'var(--talas-paper)' }}>
+    <div style={{ width: 'min(640px, 100%)', margin: '0 auto', minHeight: '100svh', background: 'var(--talas-paper)' }}>
       <TopBar />
-      <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      <div style={{ padding: 'clamp(12px, 4vw, 24px)', display: 'flex', flexDirection: 'column', gap: '16px' }}>
         {/* Progress */}
         <div>
           <div

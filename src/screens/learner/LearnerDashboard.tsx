@@ -4,6 +4,7 @@ import { mockAssignment } from '../../data/mockData'
 interface Props {
   learnerName: string
   onStartAssessment: () => void
+  onStartPractice: () => void
   onGoToProfile: () => void
 }
 
@@ -16,16 +17,16 @@ function getInitials(name: string): string {
     .toUpperCase()
 }
 
-export default function LearnerDashboard({ learnerName, onStartAssessment, onGoToProfile }: Props) {
+export default function LearnerDashboard({ learnerName, onStartAssessment, onStartPractice, onGoToProfile }: Props) {
   const displayName = learnerName.split(' ')[0] || learnerName
   const initials = getInitials(learnerName || 'M')
 
   return (
     <div
       style={{
-        maxWidth: '700px',
+        maxWidth: 'min(900px, 100%)',
         margin: '0 auto',
-        padding: '16px',
+        padding: 'clamp(12px, 4vw, 32px)',
         minHeight: '100svh',
         background: 'var(--talas-paper)',
       }}
@@ -259,128 +260,48 @@ export default function LearnerDashboard({ learnerName, onStartAssessment, onGoT
           Patuloy na Magsanay
         </div>
 
-        {/* 2-column grid */}
         <div
           style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            gap: '12px',
             marginTop: '8px',
+            background: 'var(--talas-mint)',
+            borderRadius: '20px',
+            border: '1px solid #E0E0E0',
+            padding: '20px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '16px',
           }}
         >
-          {/* Card 1: Short Story */}
-          <div
-            style={{
-              background: 'var(--talas-mint)',
-              borderRadius: '16px',
-              padding: '16px',
-              position: 'relative',
-              overflow: 'hidden',
-            }}
-          >
-            <div style={{ fontSize: '28px' }}>📖</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span style={{ fontSize: '28px' }}>💪</span>
             <div
               style={{
                 fontFamily: "'Quicksand', system-ui, sans-serif",
                 fontSize: '14px',
-                fontWeight: 700,
-                color: 'var(--talas-charcoal)',
-                marginTop: '8px',
-              }}
-            >
-              Maikling Kuwento
-            </div>
-            <div
-              style={{
-                fontFamily: "'Quicksand', system-ui, sans-serif",
-                fontSize: '12px',
                 color: '#6B7280',
-                marginTop: '4px',
               }}
             >
-              Basahin ang isang maikling kuwento
-            </div>
-            {/* Overlay */}
-            <div
-              style={{
-                position: 'absolute',
-                inset: 0,
-                borderRadius: '16px',
-                background: 'rgba(255,255,255,0.7)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <span
-                style={{
-                  fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
-                  fontSize: '12px',
-                  color: '#9CA3AF',
-                  fontWeight: 600,
-                }}
-              >
-                Malapit na!
-              </span>
+              May bagong pagsasanay para sa iyo!
             </div>
           </div>
-
-          {/* Card 2: Vocabulary */}
-          <div
+          <button
+            type="button"
+            onClick={onStartPractice}
             style={{
-              background: 'var(--talas-mint)',
+              width: '100%',
+              minHeight: '56px',
+              background: 'var(--talas-green)',
+              color: 'white',
+              border: 'none',
               borderRadius: '16px',
-              padding: '16px',
-              position: 'relative',
-              overflow: 'hidden',
+              fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+              fontSize: '16px',
+              fontWeight: 700,
+              cursor: 'pointer',
             }}
           >
-            <div style={{ fontSize: '28px' }}>🔤</div>
-            <div
-              style={{
-                fontFamily: "'Quicksand', system-ui, sans-serif",
-                fontSize: '14px',
-                fontWeight: 700,
-                color: 'var(--talas-charcoal)',
-                marginTop: '8px',
-              }}
-            >
-              Bokabularyo
-            </div>
-            <div
-              style={{
-                fontFamily: "'Quicksand', system-ui, sans-serif",
-                fontSize: '12px',
-                color: '#6B7280',
-                marginTop: '4px',
-              }}
-            >
-              Palawakin ang iyong talasalitaan
-            </div>
-            {/* Overlay */}
-            <div
-              style={{
-                position: 'absolute',
-                inset: 0,
-                borderRadius: '16px',
-                background: 'rgba(255,255,255,0.7)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <span
-                style={{
-                  fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
-                  fontSize: '12px',
-                  color: '#9CA3AF',
-                  fontWeight: 600,
-                }}
-              >
-                Malapit na!
-              </span>
-            </div>
-          </div>
+            Magsanay Tayo! 💪
+          </button>
         </div>
       </div>
 

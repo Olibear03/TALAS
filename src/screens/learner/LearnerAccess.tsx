@@ -28,13 +28,12 @@ export default function LearnerAccess({ onAccess }: Props) {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '32px 16px',
+        padding: 'clamp(12px, 4vw, 24px)',
       }}
     >
       <div
         style={{
-          width: '100%',
-          maxWidth: '480px',
+          width: 'min(400px, 100%)',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',

@@ -6,6 +6,9 @@ import OralCompletion from './screens/learner/OralCompletion'
 import SilentAssessment from './screens/learner/SilentAssessment'
 import FormalAssessmentCompletion from './screens/learner/FormalAssessmentCompletion'
 import PracticeActivity from './screens/learner/practice/PracticeActivity'
+import PracticeCompletion from './screens/learner/PracticeCompletion'
+import { getNextPracticeActivity, updatePracticeLevel } from './data/practiceData'
+import type { PracticeProfile, PracticeActivityDef } from './data/practiceData'
 
 type Screen =
   | 'learner-access'
@@ -15,24 +18,47 @@ type Screen =
   | 'silent-assessment'
   | 'formal-completion'
   | 'practice-activity'
+  | 'practice-completion'
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('learner-access')
   const [learnerName, setLearnerName] = useState<string>('')
+  const [practiceProfile, setPracticeProfile] = useState<PracticeProfile>({
+    currentLevel: 2,
+    recentScores: [],
+    consecutiveHighScores: 0,
+    consecutiveLowScores: 0,
+    completedActivityIds: [],
+  })
+  const [activeActivityId, setActiveActivityId] = useState<string>('')
+  const [lastActivityTitle, setLastActivityTitle] = useState<string>('')
+  const [lastScorePercent, setLastScorePercent] = useState<number>(0)
 
   const handleAccess = (name: string) => {
     setLearnerName(name)
     setCurrentScreen('dashboard')
   }
 
-  const handleActivityComplete = (_scorePercent: number) => {
-    // Return to dashboard after finishing an activity (practice-lobby removed; FEAT-002 adds encouragement screen)
-    setCurrentScreen('dashboard')
+  const handleStartPractice = () => {
+    const act: PracticeActivityDef = getNextPracticeActivity(practiceProfile)
+    setActiveActivityId(act.id)
+    setLastActivityTitle(act.title)
+    setCurrentScreen('practice-activity')
   }
 
-  const handleActivityBack = () => {
-    // Back arrow inside an activity goes to dashboard (practice-lobby removed; FEAT-002 restores flow)
-    setCurrentScreen('dashboard')
+  const handleActivityComplete = (scorePercent: number) => {
+    const updated = updatePracticeLevel(practiceProfile, scorePercent, activeActivityId)
+    setPracticeProfile(updated)
+    setLastScorePercent(scorePercent)
+    setCurrentScreen('practice-completion')
+  }
+
+  const handleKeepPracticing = () => {
+    // practiceProfile in state is already the updated profile from handleActivityComplete
+    const act: PracticeActivityDef = getNextPracticeActivity(practiceProfile)
+    setActiveActivityId(act.id)
+    setLastActivityTitle(act.title)
+    setCurrentScreen('practice-activity')
   }
 
   switch (currentScreen) {
@@ -44,7 +70,7 @@ export default function App() {
         <LearnerDashboard
           learnerName={learnerName}
           onStartAssessment={() => setCurrentScreen('oral-assessment')}
-          onGoToPractice={() => setCurrentScreen('practice-activity')}
+          onStartPractice={handleStartPractice}
           onGoToProfile={() => alert('Profile — malapit na!')}
         />
       )
@@ -78,9 +104,20 @@ export default function App() {
     case 'practice-activity':
       return (
         <PracticeActivity
-          activityId={'practice-001'}
+          activityId={activeActivityId}
           onComplete={handleActivityComplete}
-          onBack={handleActivityBack}
+          onBack={() => setCurrentScreen('dashboard')}
+        />
+      )
+
+    case 'practice-completion':
+      return (
+        <PracticeCompletion
+          learnerName={learnerName}
+          activityTitle={lastActivityTitle}
+          scorePercent={lastScorePercent}
+          onKeepPracticing={handleKeepPracticing}
+          onBackToDashboard={() => setCurrentScreen('dashboard')}
         />
       )
 
