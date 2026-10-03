@@ -1,4 +1,4 @@
-﻿import { BarChart3, TriangleAlert, Headphones } from 'lucide-react'
+import { BarChart3, TriangleAlert, Headphones } from 'lucide-react'
 import { useDashboardStats } from './useDashboardStats'
 
 interface QuickStatsProps {

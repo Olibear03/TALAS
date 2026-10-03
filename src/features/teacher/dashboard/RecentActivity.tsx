@@ -1,4 +1,4 @@
-﻿import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { CircleCheck, Mic, BookOpen, Baseline, ArrowRight, type LucideIcon } from 'lucide-react'
 
 interface ActivityItem {

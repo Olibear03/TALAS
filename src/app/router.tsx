@@ -1,4 +1,4 @@
-﻿import { createBrowserRouter } from 'react-router-dom'
+import { createBrowserRouter } from 'react-router-dom'
 import RoleSelector from '../features/auth/RoleSelector'
 import AppLayout from '../features/shared/components/AppLayout'
 import LearnerLayout from '../layouts/LearnerLayout'

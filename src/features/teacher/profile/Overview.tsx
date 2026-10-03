@@ -1,4 +1,4 @@
-﻿import { useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { Lock, Sparkles, Bandage, Clock, Check, ShieldCheck, type LucideIcon } from 'lucide-react'
 import {
   learnerProfile,

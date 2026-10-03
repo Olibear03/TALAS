@@ -1,4 +1,4 @@
-﻿import { NavLink, Outlet, useNavigate, useParams } from 'react-router-dom'
+import { NavLink, Outlet, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Compass, Lock, Bandage, TrendingUp, Check, Printer, SquarePen, type LucideIcon } from 'lucide-react'
 import { learnerProfile, crlaLabel, crlaDescription } from '../features/teacher/dashboard/sectionData'
 

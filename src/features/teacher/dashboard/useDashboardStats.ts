@@ -1,4 +1,4 @@
-﻿import { learnersForSection } from './sectionData'
+import { learnersForSection } from './sectionData'
 
 /** Aggregate counts shown in the dashboard quick-stats row. */
 export interface DashboardStats {

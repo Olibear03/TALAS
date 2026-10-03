@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Mock section + learner data for the teacher dashboard and learner profile.
  *
  * This is the single source of truth. No backend: swap the arrays / add a

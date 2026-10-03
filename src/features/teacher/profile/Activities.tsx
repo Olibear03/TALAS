@@ -1,4 +1,4 @@
-﻿import { useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { TrendingUp, Minus, TrendingDown, Sparkles, BarChart3, Clock, type LucideIcon } from 'lucide-react'
 import {
   learnerProfile,
