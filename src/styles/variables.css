@@ -1,0 +1,57 @@
+/**
+ * TALAS design tokens.
+ * Branding sourced from the design-system reference:
+ *   Primary #4BAE4F · Secondary #5D87E6 · Tertiary #FFB82E · Neutral #1F2922
+ *   Headline: Comfortaa · Body/Label: Plus Jakarta Sans
+ * Change values here to re-skin the app; components reference these tokens only.
+ */
+:root {
+  /* Brand colors */
+  --color-primary: #4bae4f;
+  --color-primary-dark: #3a8c3d;
+  --color-primary-light: #e3f3e4;
+
+  --color-secondary: #5d87e6;
+  --color-secondary-dark: #4169c4;
+  --color-secondary-light: #e4ebfb;
+
+  --color-tertiary: #ffb82e;
+  --color-tertiary-dark: #d9960f;
+  --color-tertiary-light: #fff2d6;
+
+  --color-neutral: #1f2922;
+
+  /* Surfaces & text */
+  --color-bg: #f3f7f3;
+  --color-surface: #ffffff;
+  --color-surface-muted: #eef4ee;
+  --color-border: #d8e3d8;
+  --color-text: #1f2922;
+  --color-text-muted: #5b6b5e;
+  --color-text-inverted: #ffffff;
+
+  /* Typography */
+  --font-heading: 'Comfortaa', system-ui, sans-serif;
+  --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+
+  /* Radii */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 24px;
+  --radius-pill: 999px;
+
+  /* Spacing scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-8: 48px;
+  --space-10: 64px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(31, 41, 34, 0.06);
+  --shadow-md: 0 8px 24px rgba(31, 41, 34, 0.1);
+  --shadow-lg: 0 20px 48px rgba(31, 41, 34, 0.14);
+}
