@@ -3,6 +3,7 @@ import './ReadingAssessment.css'
 import {
   getAll,
   save,
+  syncNow,
   useOnline,
   type ReadingPassage,
 } from '../data'
@@ -208,6 +209,9 @@ export default function ReadingAssessment({ onExit }: { onExit?: () => void }) {
       durationSec: speech.durationSec || undefined,
       createdAt: new Date().toISOString(),
     })
+    // Push to the cloud database immediately (offline-safe: stays dirty and
+    // auto-syncs on reconnect if there's no connection right now).
+    void syncNow()
     setSaved(true)
   }
 

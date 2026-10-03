@@ -20,9 +20,10 @@ export default function SilentAssessment({ onComplete }: Props) {
   const currentQuestion = questions[currentQuestionIndex]
   const isLastQuestion = currentQuestionIndex === questions.length - 1
 
-  // Question timer
+  // Question timer. The per-question reset to 0 is handled in handleNext (and
+  // the initial state is 0), so the effect only needs to run the interval —
+  // avoiding a synchronous setState in the effect body.
   useEffect(() => {
-    setQuestionSeconds(0)
     const id = setInterval(() => {
       setQuestionSeconds((prev) => prev + 1)
     }, 1000)

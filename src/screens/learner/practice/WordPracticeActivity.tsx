@@ -6,37 +6,8 @@ interface Props {
   onBack: () => void
 }
 
-export default function WordPracticeActivity({ onComplete, onBack }: Props) {
-  const [index, setIndex] = useState(0)
-  const [selected, setSelected] = useState<number | null>(null)
-  const [answered, setAnswered] = useState(false)
-  const [showHint, setShowHint] = useState(false)
-  const [correctCount, setCorrectCount] = useState(0)
-
-  const item = wordPracticeItems[index]
-  const isLast = index === wordPracticeItems.length - 1
-  const choiceLabels = ['A', 'B', 'C', 'D']
-
-  // Split sentence on ___ for display
-  const parts = item.sentence.split('___')
-
-  const handleSelect = (i: number) => {
-    if (answered) return
-    setSelected(i)
-    setAnswered(true)
-    if (i === item.correctIndex) setCorrectCount((c) => c + 1)
-    setShowHint(false)
-  }
-
-  const handleNext = () => {
-    if (isLast) { onComplete(Math.round((correctCount / wordPracticeItems.length) * 100)); return }
-    setIndex((v) => v + 1)
-    setSelected(null)
-    setAnswered(false)
-    setShowHint(false)
-  }
-
-  const TopBar = () => (
+function TopBar({ onBack }: { onBack: () => void }) {
+  return (
     <div
       style={{
         background: 'white',
@@ -93,12 +64,43 @@ export default function WordPracticeActivity({ onComplete, onBack }: Props) {
       </span>
     </div>
   )
+}
+
+export default function WordPracticeActivity({ onComplete, onBack }: Props) {
+  const [index, setIndex] = useState(0)
+  const [selected, setSelected] = useState<number | null>(null)
+  const [answered, setAnswered] = useState(false)
+  const [showHint, setShowHint] = useState(false)
+  const [correctCount, setCorrectCount] = useState(0)
+
+  const item = wordPracticeItems[index]
+  const isLast = index === wordPracticeItems.length - 1
+  const choiceLabels = ['A', 'B', 'C', 'D']
+
+  // Split sentence on ___ for display
+  const parts = item.sentence.split('___')
+
+  const handleSelect = (i: number) => {
+    if (answered) return
+    setSelected(i)
+    setAnswered(true)
+    if (i === item.correctIndex) setCorrectCount((c) => c + 1)
+    setShowHint(false)
+  }
+
+  const handleNext = () => {
+    if (isLast) { onComplete(Math.round((correctCount / wordPracticeItems.length) * 100)); return }
+    setIndex((v) => v + 1)
+    setSelected(null)
+    setAnswered(false)
+    setShowHint(false)
+  }
 
   const correctWord = item.choices[item.correctIndex]
 
   return (
     <div style={{ width: 'min(640px, 100%)', margin: '0 auto', minHeight: '100svh', background: 'var(--talas-paper)' }}>
-      <TopBar />
+      <TopBar onBack={onBack} />
       <div style={{ padding: 'clamp(12px, 4vw, 24px)', display: 'flex', flexDirection: 'column', gap: '16px' }}>
 
         {/* Progress */}

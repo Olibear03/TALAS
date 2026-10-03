@@ -164,6 +164,12 @@ export interface ReadingAttempt extends SyncMeta {
   online: boolean;
   /** Seconds of recorded audio, if captured. */
   durationSec?: number;
+  /**
+   * S3 object key of the uploaded voice recording (e.g.
+   * "recordings/learner-maria/attempt-123.webm"), if it was uploaded to
+   * storage. The teacher review resolves this to a presigned playback URL.
+   */
+  audioKey?: string;
   createdAt: ISODateString;
 }
 

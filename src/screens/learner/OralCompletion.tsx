@@ -1,10 +1,39 @@
+import { useRef, useState } from 'react'
 import FrogMascot from '../../components/FrogMascot'
+import type { OralResult } from './OralAssessment'
 
 interface Props {
+  result: OralResult | null
   onContinue: () => void
 }
 
-export default function OralCompletion({ onContinue }: Props) {
+export default function OralCompletion({ result, onContinue }: Props) {
+  const audioRef = useRef<HTMLAudioElement | null>(null)
+  const [playTime, setPlayTime] = useState(0)
+
+  const accuracy = result?.accuracy ?? 0
+  const tone =
+    accuracy >= 80 ? 'strong' : accuracy >= 60 ? 'ok' : 'weak'
+  const toneColor =
+    tone === 'strong'
+      ? 'var(--talas-green)'
+      : tone === 'ok'
+        ? 'var(--talas-blue)'
+        : 'var(--talas-coral)'
+  const label =
+    tone === 'strong'
+      ? 'Mahusay! 🎉'
+      : tone === 'ok'
+        ? 'Magaling, ituloy mo lang!'
+        : 'Magaling sa pagsubok!'
+
+  function seekToWord(timeSec?: number) {
+    const audio = audioRef.current
+    if (!audio || timeSec === undefined) return
+    audio.currentTime = Math.max(0, timeSec)
+    void audio.play().catch(() => {})
+  }
+
   return (
     <div
       style={{
@@ -13,56 +42,205 @@ export default function OralCompletion({ onContinue }: Props) {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'center',
         padding: '32px 16px',
-        maxWidth: '480px',
+        maxWidth: '680px',
         margin: '0 auto',
       }}
     >
-      <FrogMascot size={160} />
-
+      <FrogMascot size={120} />
       <h1
         style={{
-          margin: '16px 0 0 0',
+          margin: '12px 0 0 0',
           fontFamily: "'Comfortaa', system-ui, sans-serif",
-          fontSize: '36px',
+          fontSize: '32px',
           fontWeight: 700,
-          color: 'var(--talas-green)',
+          color: toneColor,
           textAlign: 'center',
         }}
       >
-        Mahusay! 🎉
+        {label}
       </h1>
-
       <p
         style={{
-          margin: '8px 0 0 0',
+          margin: '6px 0 0 0',
           fontFamily: "'Quicksand', system-ui, sans-serif",
-          fontSize: '18px',
+          fontSize: '16px',
           color: 'var(--talas-charcoal)',
           textAlign: 'center',
         }}
       >
-        Natapos mo ang unang bahagi.
+        Natapos mo ang pasalitang pagbasa.
       </p>
 
-      <p
-        style={{
-          margin: '4px 0 0 0',
-          fontFamily: "'Quicksand', system-ui, sans-serif",
-          fontSize: '15px',
-          color: '#6B7280',
-          textAlign: 'center',
-        }}
-      >
-        Sunod naman ang tahimik na pagbasa.
-      </p>
+      {result && (
+        <>
+          {/* Score + stats */}
+          <div
+            style={{
+              marginTop: '20px',
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: '10px',
+              width: '100%',
+            }}
+          >
+            {[
+              { v: `${accuracy}%`, l: 'Katumpakan', c: toneColor },
+              { v: result.correctWords, l: 'Tama', c: 'var(--talas-green)' },
+              {
+                v: result.totalWords - result.correctWords,
+                l: 'Mali / Nalaktawan',
+                c: 'var(--talas-coral)',
+              },
+            ].map((s) => (
+              <div
+                key={s.l}
+                style={{
+                  background: 'white',
+                  border: '1px solid #E8F8EC',
+                  borderRadius: '16px',
+                  padding: '16px 8px',
+                  textAlign: 'center',
+                }}
+              >
+                <div
+                  style={{
+                    fontFamily: "'Comfortaa', system-ui, sans-serif",
+                    fontSize: '26px',
+                    fontWeight: 700,
+                    color: s.c,
+                  }}
+                >
+                  {s.v}
+                </div>
+                <div
+                  style={{
+                    fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+                    fontSize: '11px',
+                    color: '#6B7280',
+                    marginTop: '2px',
+                  }}
+                >
+                  {s.l}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Recording for teacher review */}
+          {result.audioUrl && (
+            <div style={{ width: '100%', marginTop: '18px', textAlign: 'center' }}>
+              <div
+                style={{
+                  fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  color: 'var(--talas-charcoal)',
+                  marginBottom: '6px',
+                }}
+              >
+                Recording
+              </div>
+              <audio
+                ref={audioRef}
+                controls
+                src={result.audioUrl}
+                style={{ width: '100%' }}
+                onTimeUpdate={(e) => setPlayTime(e.currentTarget.currentTime)}
+              />
+            </div>
+          )}
+
+          {/* Word-by-word review — click a word to jump the recording */}
+          <div
+            style={{
+              width: '100%',
+              marginTop: '18px',
+              background: 'white',
+              border: '1px solid #E8F8EC',
+              borderRadius: '20px',
+              padding: '20px',
+            }}
+          >
+            <div
+              style={{
+                fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+                fontSize: '11px',
+                fontWeight: 600,
+                textTransform: 'uppercase',
+                letterSpacing: '0.1em',
+                color: 'var(--talas-green)',
+                marginBottom: '4px',
+              }}
+            >
+              Pagsusuri ng Pagbasa
+            </div>
+            {result.audioUrl && (
+              <div
+                style={{
+                  fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+                  fontSize: '12px',
+                  color: '#9CA3AF',
+                  marginBottom: '10px',
+                }}
+              >
+                I-click ang salita para lumukso ang recording.
+              </div>
+            )}
+            <div
+              style={{
+                fontFamily: "'Quicksand', system-ui, sans-serif",
+                fontSize: '18px',
+                lineHeight: 1.8,
+              }}
+            >
+              {result.words.map((w) => {
+                const next = result.words[w.index + 1]?.timeSec
+                const active =
+                  w.timeSec !== undefined &&
+                  playTime >= w.timeSec &&
+                  (next === undefined || playTime < next)
+                return (
+                  <button
+                    key={w.index}
+                    type="button"
+                    onClick={() => seekToWord(w.timeSec)}
+                    disabled={!result.audioUrl || w.timeSec === undefined}
+                    title={w.timeSec !== undefined ? `${w.timeSec.toFixed(1)}s` : undefined}
+                    style={{
+                      font: 'inherit',
+                      border: 'none',
+                      margin: '0 1px 4px',
+                      padding: '2px 5px',
+                      borderRadius: '8px',
+                      cursor: result.audioUrl ? 'pointer' : 'default',
+                      background: active
+                        ? 'var(--talas-sky)'
+                        : w.correct
+                          ? 'var(--talas-mint)'
+                          : '#FDECE8',
+                      color: active
+                        ? 'var(--talas-blue)'
+                        : w.correct
+                          ? 'var(--talas-green)'
+                          : 'var(--talas-coral)',
+                      boxShadow: active ? '0 0 0 2px var(--talas-blue)' : 'none',
+                    }}
+                  >
+                    {w.expected}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        </>
+      )}
 
       <button
         type="button"
         onClick={onContinue}
         style={{
-          marginTop: '32px',
+          marginTop: '28px',
           width: '100%',
           minHeight: '56px',
           background: 'var(--talas-green)',

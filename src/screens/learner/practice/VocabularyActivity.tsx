@@ -6,31 +6,8 @@ interface Props {
   onBack: () => void
 }
 
-export default function VocabularyActivity({ onComplete, onBack }: Props) {
-  const [index, setIndex] = useState(0)
-  const [selected, setSelected] = useState<number | null>(null)
-  const [answered, setAnswered] = useState(false)
-  const [correctCount, setCorrectCount] = useState(0)
-
-  const item = vocabularyItems[index]
-  const isLast = index === vocabularyItems.length - 1
-  const choiceLabels = ['A', 'B', 'C', 'D']
-
-  const handleSelect = (i: number) => {
-    if (answered) return
-    setSelected(i)
-    setAnswered(true)
-    if (i === item.correctIndex) setCorrectCount((c) => c + 1)
-  }
-
-  const handleNext = () => {
-    if (isLast) { onComplete(Math.round((correctCount / vocabularyItems.length) * 100)); return }
-    setIndex((v) => v + 1)
-    setSelected(null)
-    setAnswered(false)
-  }
-
-  const TopBar = () => (
+function TopBar({ onBack }: { onBack: () => void }) {
+  return (
     <div
       style={{
         background: 'white',
@@ -87,10 +64,35 @@ export default function VocabularyActivity({ onComplete, onBack }: Props) {
       </span>
     </div>
   )
+}
+
+export default function VocabularyActivity({ onComplete, onBack }: Props) {
+  const [index, setIndex] = useState(0)
+  const [selected, setSelected] = useState<number | null>(null)
+  const [answered, setAnswered] = useState(false)
+  const [correctCount, setCorrectCount] = useState(0)
+
+  const item = vocabularyItems[index]
+  const isLast = index === vocabularyItems.length - 1
+  const choiceLabels = ['A', 'B', 'C', 'D']
+
+  const handleSelect = (i: number) => {
+    if (answered) return
+    setSelected(i)
+    setAnswered(true)
+    if (i === item.correctIndex) setCorrectCount((c) => c + 1)
+  }
+
+  const handleNext = () => {
+    if (isLast) { onComplete(Math.round((correctCount / vocabularyItems.length) * 100)); return }
+    setIndex((v) => v + 1)
+    setSelected(null)
+    setAnswered(false)
+  }
 
   return (
     <div style={{ width: 'min(640px, 100%)', margin: '0 auto', minHeight: '100svh', background: 'var(--talas-paper)' }}>
-      <TopBar />
+      <TopBar onBack={onBack} />
       <div style={{ padding: 'clamp(12px, 4vw, 24px)', display: 'flex', flexDirection: 'column', gap: '16px' }}>
         {/* Progress */}
         <div>

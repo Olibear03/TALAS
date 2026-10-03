@@ -102,6 +102,8 @@ export interface SpeechRecognitionState {
    * Empty for the Web Speech API, which exposes no per-word offsets.
    */
   getWordTimings: () => VoskWord[];
+  /** The recorded audio Blob (for uploading to storage), or null. */
+  getAudioBlob: () => Blob | null;
 }
 
 export function useSpeechRecognition(
@@ -126,6 +128,7 @@ export function useSpeechRecognition(
   const recorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+  const audioBlobRef = useRef<Blob | null>(null);
   const finalRef = useRef("");
   const startTimeRef = useRef(0);
   // High-resolution timestamp (performance.now) of when the recorder actually
@@ -170,6 +173,7 @@ export function useSpeechRecognition(
     transcriptRef.current = "";
     wordTimingsRef.current = [];
     chunksRef.current = [];
+    audioBlobRef.current = null;
     recClockRef.current = 0;
     if (audioUrl) URL.revokeObjectURL(audioUrl);
     setAudioUrl(null);
@@ -210,6 +214,7 @@ export function useSpeechRecognition(
           const blob = new Blob(chunksRef.current, {
             type: recorder.mimeType || "audio/webm",
           });
+          audioBlobRef.current = blob;
           setAudioUrl(URL.createObjectURL(blob));
         }
         setDurationSec(Math.round((Date.now() - startTimeRef.current) / 1000));
@@ -367,6 +372,7 @@ export function useSpeechRecognition(
     wordTimingsRef.current = [];
     recClockRef.current = 0;
     chunksRef.current = [];
+    audioBlobRef.current = null;
     setDurationSec(0);
     setError(null);
     setStatus("idle");
@@ -378,6 +384,7 @@ export function useSpeechRecognition(
   }, []);
 
   const getWordTimings = useCallback(() => wordTimingsRef.current, []);
+  const getAudioBlob = useCallback(() => audioBlobRef.current, []);
 
   useEffect(() => {
     return () => {
@@ -406,5 +413,6 @@ export function useSpeechRecognition(
     reset,
     setManualTranscript,
     getWordTimings,
+    getAudioBlob,
   };
 }

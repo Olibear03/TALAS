@@ -7,6 +7,67 @@ interface Props {
   onBack: () => void
 }
 
+// ── Top bar (shared across phases) ──
+function TopBar({ label, onBack }: { label: string; onBack: () => void }) {
+  return (
+    <div
+      style={{
+        background: 'white',
+        borderBottom: '1px solid #E8F8EC',
+        padding: '12px 16px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+        position: 'sticky',
+        top: 0,
+        zIndex: 5,
+      }}
+    >
+      <button
+        type="button"
+        onClick={onBack}
+        style={{
+          minHeight: '48px',
+          minWidth: '48px',
+          background: 'transparent',
+          border: 'none',
+          color: 'var(--talas-blue)',
+          fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+          fontSize: '14px',
+          cursor: 'pointer',
+          padding: '0 8px',
+        }}
+      >
+        ←
+      </button>
+      <div
+        style={{
+          flex: 1,
+          fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+          fontSize: '14px',
+          fontWeight: 600,
+          color: 'var(--talas-charcoal)',
+        }}
+      >
+        🐦 {label}
+      </div>
+      <span
+        style={{
+          background: 'var(--talas-mint)',
+          color: 'var(--talas-green)',
+          borderRadius: '999px',
+          padding: '4px 10px',
+          fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+          fontSize: '11px',
+          fontWeight: 600,
+        }}
+      >
+        Pag-unawa
+      </span>
+    </div>
+  )
+}
+
 // ─── Word Help Tooltip ────────────────────────────────────────────────────────
 
 function WordHelpChip({ help }: { help: WordHelp }) {
@@ -156,70 +217,11 @@ export default function ComprehensionActivity({ onComplete, onBack }: Props) {
     }
   }
 
-  // ── Top bar (shared across phases) ──
-  const TopBar = ({ label }: { label: string }) => (
-    <div
-      style={{
-        background: 'white',
-        borderBottom: '1px solid #E8F8EC',
-        padding: '12px 16px',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '12px',
-        position: 'sticky',
-        top: 0,
-        zIndex: 5,
-      }}
-    >
-      <button
-        type="button"
-        onClick={onBack}
-        style={{
-          minHeight: '48px',
-          minWidth: '48px',
-          background: 'transparent',
-          border: 'none',
-          color: 'var(--talas-blue)',
-          fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
-          fontSize: '14px',
-          cursor: 'pointer',
-          padding: '0 8px',
-        }}
-      >
-        ←
-      </button>
-      <div
-        style={{
-          flex: 1,
-          fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
-          fontSize: '14px',
-          fontWeight: 600,
-          color: 'var(--talas-charcoal)',
-        }}
-      >
-        🐦 {label}
-      </div>
-      <span
-        style={{
-          background: 'var(--talas-mint)',
-          color: 'var(--talas-green)',
-          borderRadius: '999px',
-          padding: '4px 10px',
-          fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
-          fontSize: '11px',
-          fontWeight: 600,
-        }}
-      >
-        Pag-unawa
-      </span>
-    </div>
-  )
-
   // ── READING phase ──
   if (phase === 'reading') {
     return (
       <div style={{ width: 'min(640px, 100%)', margin: '0 auto', minHeight: '100svh', background: 'var(--talas-paper)' }}>
-        <TopBar label={title} />
+        <TopBar label={title} onBack={onBack} />
         <div style={{ padding: 'clamp(12px, 4vw, 24px)', display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {/* Passage card */}
           <div
@@ -298,7 +300,7 @@ export default function ComprehensionActivity({ onComplete, onBack }: Props) {
   // ── QUIZ phase ──
   return (
     <div style={{ width: 'min(640px, 100%)', margin: '0 auto', minHeight: '100svh', background: 'var(--talas-paper)' }}>
-      <TopBar label={title} />
+      <TopBar label={title} onBack={onBack} />
       <div style={{ padding: 'clamp(12px, 4vw, 24px)', display: 'flex', flexDirection: 'column', gap: '16px' }}>
         {/* Progress */}
         <div>

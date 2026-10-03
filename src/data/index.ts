@@ -13,3 +13,4 @@ export * from "./online";
 export * from "./api";
 export * from "./sync";
 export * from "./syncController";
+export * from "./recordings";

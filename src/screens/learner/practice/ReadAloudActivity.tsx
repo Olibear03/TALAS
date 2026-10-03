@@ -6,6 +6,66 @@ interface Props {
   onBack: () => void
 }
 
+function TopBar({ onBack }: { onBack: () => void }) {
+  return (
+    <div
+      style={{
+        background: 'white',
+        borderBottom: '1px solid #E8F8EC',
+        padding: '12px 16px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+        position: 'sticky',
+        top: 0,
+        zIndex: 5,
+      }}
+    >
+      <button
+        type="button"
+        onClick={onBack}
+        style={{
+          minHeight: '48px',
+          minWidth: '48px',
+          background: 'transparent',
+          border: 'none',
+          color: 'var(--talas-blue)',
+          fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+          fontSize: '14px',
+          cursor: 'pointer',
+          padding: '0 8px',
+        }}
+      >
+        ←
+      </button>
+      <div
+        style={{
+          flex: 1,
+          fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+          fontSize: '14px',
+          fontWeight: 600,
+          color: 'var(--talas-charcoal)',
+        }}
+      >
+        🗣️ Basahin Natin
+      </div>
+      <span
+        style={{
+          background: 'var(--talas-buttercream)',
+          color: '#92400E',
+          borderRadius: '999px',
+          padding: '4px 10px',
+          fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+          fontSize: '11px',
+          fontWeight: 600,
+        }}
+      >
+        Pagsasanay sa Pagbasa
+      </span>
+    </div>
+  )
+}
+
 export default function ReadAloudActivity({ onComplete, onBack }: Props) {
   const { title, sentences } = readAloudPassage
   const [highlightIndex, setHighlightIndex] = useState<number | null>(null)
@@ -63,67 +123,9 @@ export default function ReadAloudActivity({ onComplete, onBack }: Props) {
     }
   }
 
-  const TopBar = () => (
-    <div
-      style={{
-        background: 'white',
-        borderBottom: '1px solid #E8F8EC',
-        padding: '12px 16px',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '12px',
-        position: 'sticky',
-        top: 0,
-        zIndex: 5,
-      }}
-    >
-      <button
-        type="button"
-        onClick={onBack}
-        style={{
-          minHeight: '48px',
-          minWidth: '48px',
-          background: 'transparent',
-          border: 'none',
-          color: 'var(--talas-blue)',
-          fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
-          fontSize: '14px',
-          cursor: 'pointer',
-          padding: '0 8px',
-        }}
-      >
-        ←
-      </button>
-      <div
-        style={{
-          flex: 1,
-          fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
-          fontSize: '14px',
-          fontWeight: 600,
-          color: 'var(--talas-charcoal)',
-        }}
-      >
-        🗣️ Basahin Natin
-      </div>
-      <span
-        style={{
-          background: 'var(--talas-buttercream)',
-          color: '#92400E',
-          borderRadius: '999px',
-          padding: '4px 10px',
-          fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
-          fontSize: '11px',
-          fontWeight: 600,
-        }}
-      >
-        Pagsasanay sa Pagbasa
-      </span>
-    </div>
-  )
-
   return (
     <div style={{ width: 'min(640px, 100%)', margin: '0 auto', minHeight: '100svh', background: 'var(--talas-paper)' }}>
-      <TopBar />
+      <TopBar onBack={onBack} />
       <div style={{ padding: 'clamp(12px, 4vw, 24px)', display: 'flex', flexDirection: 'column', gap: '16px' }}>
 
         {/* Instruction card */}
