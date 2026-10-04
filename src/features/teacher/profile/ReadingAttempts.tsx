@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { Mic, Play, Clock } from 'lucide-react'
 import type { ReadingAttempt } from '../../../data'
+import { profileFromAccuracy, CRLA_PROFILE_LABEL } from '../../../reading/crla'
 import { useReadingAttempts, resolveRecordingUrl } from './useReadingAttempts'
 
 function fmtDate(iso: string): string {
@@ -15,10 +16,18 @@ function fmtDate(iso: string): string {
       })
 }
 
+/**
+ * CRLA proficiency chip for an attempt, derived from oral-reading accuracy via
+ * the shared standard (reading/crla.ts). Shows the profile code + label, e.g.
+ * "GR · Grade Ready".
+ */
 function band(accuracy: number): { label: string; cls: string } {
-  if (accuracy >= 80) return { label: 'Strong', cls: 'bg-sprout-50 text-sprout-500' }
-  if (accuracy >= 60) return { label: 'Average', cls: 'bg-sky-50 text-sky-500' }
-  return { label: 'Needs support', cls: 'bg-coral-50 text-coral-500' }
+  const level = profileFromAccuracy(accuracy)
+  const label = `${level} · ${CRLA_PROFILE_LABEL[level]}`
+  if (level === 'GR') return { label, cls: 'bg-sprout-50 text-sprout-500' }
+  if (level === 'LR') return { label, cls: 'bg-sky-50 text-sky-500' }
+  if (level === 'MR') return { label, cls: 'bg-amber-50 text-amber-600' }
+  return { label, cls: 'bg-coral-50 text-coral-500' }
 }
 
 /** One submitted oral reading attempt, with score, word review, and recording. */
@@ -142,7 +151,7 @@ function AttemptCard({ attempt }: { attempt: ReadingAttempt }) {
 
 /** Teacher view of a learner's submitted oral reading attempts (synced). */
 export default function ReadingAttempts({ learnerId }: { learnerId: string | undefined }) {
-  const { attempts, loading, refresh, debug } = useReadingAttempts(learnerId)
+  const { attempts, loading, refresh } = useReadingAttempts(learnerId)
 
   return (
     <section className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-4">
@@ -161,15 +170,6 @@ export default function ReadingAttempts({ learnerId }: { learnerId: string | und
           Refresh
         </button>
       </div>
-
-      {/* Debug readout — shows what's actually in the DB vs. the id queried. */}
-      <p className="font-sans text-xs text-gray-400">
-        Querying id: <span className="font-mono text-charcoal">{learnerId ?? '—'}</span> ·
-        matched {attempts.length} · total in DB: {debug.totalInDb}
-        {debug.allIds.length > 0 && (
-          <> · ids present: {debug.allIds.join(', ')}</>
-        )}
-      </p>
 
       {loading ? (
         <p className="font-sans text-sm text-gray-400">Loading submissions…</p>

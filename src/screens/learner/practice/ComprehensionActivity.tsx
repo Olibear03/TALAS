@@ -1,10 +1,52 @@
 import { useState } from 'react'
 import { comprehensionPassage } from '../../../data/practiceData'
 import type { WordHelp } from '../../../data/practiceData'
+import { getActivity } from '../../../data/contentBank'
 
 interface Props {
   onComplete: (scorePercent: number) => void
   onBack: () => void
+  /** Content Bank activity id (e.g. "L2-MIX-001"). Falls back to demo content. */
+  activityId?: string
+}
+
+/** Shape the reading UI renders — same for demo content and Content Bank. */
+interface ReadingContent {
+  title: string
+  paragraphs: string[]
+  wordHelp: WordHelp[]
+  questions: { question: string; choices: string[]; correctIndex: number; explanation?: string }[]
+}
+
+/** Adapts a Content Bank activity (by id) into the reading UI shape. */
+function contentForActivity(activityId: string | undefined): ReadingContent {
+  if (activityId) {
+    const a = getActivity(activityId)
+    if (a) {
+      return {
+        title: a.title,
+        paragraphs: a.passage,
+        wordHelp: a.difficultWords.map((w) => ({
+          word: w.word,
+          simpleDefinition: w.meaning,
+          example: w.example,
+        })),
+        questions: a.questions.map((q) => ({
+          question: q.prompt,
+          choices: q.choices,
+          correctIndex: q.correctIndex,
+          explanation: q.explanation,
+        })),
+      }
+    }
+  }
+  // Fallback: legacy demo passage.
+  return {
+    title: comprehensionPassage.title,
+    paragraphs: comprehensionPassage.paragraphs,
+    wordHelp: comprehensionPassage.wordHelp,
+    questions: comprehensionPassage.questions,
+  }
 }
 
 // ── Top bar (shared across phases) ──
@@ -188,8 +230,11 @@ function AnnotatedParagraph({ text, wordHelp }: { text: string; wordHelp: WordHe
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-export default function ComprehensionActivity({ onComplete, onBack }: Props) {
-  const { title, paragraphs, wordHelp, questions } = comprehensionPassage
+export default function ComprehensionActivity({ onComplete, onBack, activityId }: Props) {
+  const { title, paragraphs, wordHelp, questions } = contentForActivity(activityId)
+  // Read-aloud / passage-only activities have no questions — if the bank
+  // activity carries none, start directly in a state that scores on finish.
+  const hasQuestions = questions.length > 0
   const [phase, setPhase] = useState<'reading' | 'quiz'>('reading')
   const [qIndex, setQIndex] = useState(0)
   const [selected, setSelected] = useState<number | null>(null)
@@ -276,7 +321,7 @@ export default function ComprehensionActivity({ onComplete, onBack }: Props) {
 
           <button
             type="button"
-            onClick={() => setPhase('quiz')}
+            onClick={() => (hasQuestions ? setPhase('quiz') : onComplete(100))}
             style={{
               width: '100%',
               minHeight: '56px',
@@ -290,7 +335,7 @@ export default function ComprehensionActivity({ onComplete, onBack }: Props) {
               cursor: 'pointer',
             }}
           >
-            Sagutin ang mga Tanong →
+            {hasQuestions ? 'Sagutin ang mga Tanong →' : 'Tapusin ✓'}
           </button>
         </div>
       </div>

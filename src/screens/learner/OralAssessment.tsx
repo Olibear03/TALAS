@@ -33,15 +33,17 @@ interface Props {
   onSubmit: (result: OralResult) => void
   /** The logged-in learner's id; the saved attempt is attributed to them. */
   learnerId?: string
+  /** Passage text to read. Defaults to the Maya story when not assigned. */
+  passageText?: string
+  /** Passage/activity id stored on the attempt (carries the level back). */
+  passageId?: string
 }
 
-const PASSAGE_ID = 'passage-oral-maya'
+const DEFAULT_PASSAGE_ID = 'passage-oral-maya'
 const DEFAULT_LEARNER_ID = 'learner-maria' // fallback when no session supplied
 
-const ORAL_PASSAGE =
+const DEFAULT_ORAL_PASSAGE =
   "Masaya si Maya sa bukid. Nakakita siya ng mga paru-paro sa paligid ng mga bulaklak. Tumakbo siya patungo sa kanyang nanay at sinabi, 'Nanay, maganda ang mga paru-paro!' Ngumiti ang kanyang nanay at sinabing, 'Oo, mahal. Ingatan natin sila.'"
-
-const words = tokenize(ORAL_PASSAGE)
 
 function formatTime(s: number): string {
   return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(
@@ -59,7 +61,16 @@ export default function OralAssessment({
   onBack,
   onSubmit,
   learnerId = DEFAULT_LEARNER_ID,
+  passageText,
+  passageId,
 }: Props) {
+  // The passage to read + the id stored on the attempt. When the teacher has
+  // assigned a Content Bank level, these come in as props; otherwise fall back
+  // to the default Maya story.
+  const ORAL_PASSAGE = passageText && passageText.trim() ? passageText : DEFAULT_ORAL_PASSAGE
+  const PASSAGE_ID = passageId ?? DEFAULT_PASSAGE_ID
+  const words = useMemo(() => tokenize(ORAL_PASSAGE), [ORAL_PASSAGE])
+
   const speech = useSpeechRecognition('fil-PH')
   const [elapsedSeconds, setElapsedSeconds] = useState<number>(0)
   const finishingRef = useRef(false)
@@ -72,7 +83,7 @@ export default function OralAssessment({
   // Live reading position from REAL recognized speech (not a timer).
   const progress = useMemo(
     () => readingProgress(ORAL_PASSAGE, speech.transcript),
-    [speech.transcript],
+    [ORAL_PASSAGE, speech.transcript],
   )
   const activeWordIndex = Math.min(progress.cursor, words.length - 1)
 
@@ -106,7 +117,7 @@ export default function OralAssessment({
         engine: speech.engine,
       }
     },
-    [speech, elapsedSeconds],
+    [ORAL_PASSAGE, speech, elapsedSeconds],
   )
 
   // Persist the attempt to IndexedDB (offline-safe, syncs when online).
@@ -153,7 +164,7 @@ export default function OralAssessment({
         console.error('[TALAS] Failed to save reading attempt:', err)
       }
     },
-    [speech, learnerId],
+    [PASSAGE_ID, speech, learnerId],
   )
 
   const finishReading = useCallback(async () => {
@@ -172,7 +183,7 @@ export default function OralAssessment({
       const t = setTimeout(() => void finishReading(), 600)
       return () => clearTimeout(t)
     }
-  }, [isRecording, progress.cursor, finishReading])
+  }, [isRecording, progress.cursor, words.length, finishReading])
 
   const handleStart = () => {
     finishingRef.current = false

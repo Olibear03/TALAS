@@ -1,3 +1,5 @@
+import { CONTENT_BANK, type ActivityCategory } from './contentBank'
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export type ActivityType = 'comprehension' | 'vocabulary' | 'read-aloud' | 'word-practice'
@@ -34,6 +36,12 @@ export interface PracticeActivityDef {
   title: string
   type: ActivityType
   level: number
+  /**
+   * True for Mixed Reading activities. Per the TALAS Content Bank, only these
+   * provide evidence strong enough to move the learner's adaptive level;
+   * focused-skill activities are supportive only.
+   */
+  levelEvidence: boolean
 }
 
 export interface PracticeProfile {
@@ -44,17 +52,39 @@ export interface PracticeProfile {
   completedActivityIds: string[]
 }
 
+/** Highest adaptive reading level (the Content Bank defines levels 1–5). */
+export const MAX_PRACTICE_LEVEL = 5
+
 // ─── Internal activity registry (never exposed as a browsable catalog) ─────────
 
-export const activityRegistry: PracticeActivityDef[] = [
-  { id: 'practice-001', title: 'Ang Munting Ibon',        type: 'comprehension', level: 1 },
-  { id: 'practice-002', title: 'Hanapin ang Salita',      type: 'vocabulary',    level: 1 },
-  { id: 'practice-003', title: 'Basahin Natin',           type: 'read-aloud',    level: 1 },
-  { id: 'practice-004', title: 'Piliin ang Tamang Salita', type: 'word-practice', level: 2 },
-  { id: 'practice-005', title: 'Ang Munting Palaka',      type: 'comprehension', level: 2 },
-  { id: 'practice-006', title: 'Salitang Bago',           type: 'vocabulary',    level: 2 },
-  { id: 'practice-007', title: 'Basahin ang Kuwento',     type: 'comprehension', level: 3 },
-]
+/**
+ * The registry is derived from the structured Content Bank so there is a single
+ * source of truth for activities. Each bank activity maps to a UI ActivityType;
+ * Mixed Reading activities carry levelEvidence = true. The learner never sees
+ * the full registry — TALAS picks the next activity adaptively.
+ */
+function activityTypeForCategory(category: ActivityCategory): ActivityType {
+  switch (category) {
+    case 'word-recognition':
+      return 'word-practice'
+    case 'vocabulary':
+      return 'vocabulary'
+    case 'read-aloud':
+      return 'read-aloud'
+    case 'mixed-reading':
+    case 'comprehension':
+    default:
+      return 'comprehension'
+  }
+}
+
+export const activityRegistry: PracticeActivityDef[] = CONTENT_BANK.map((a) => ({
+  id: a.id,
+  title: a.title,
+  type: activityTypeForCategory(a.category),
+  level: a.level,
+  levelEvidence: a.levelEvidence,
+}))
 
 // ─── Adaptive activity selection ──────────────────────────────────────────────
 
@@ -91,9 +121,17 @@ export function getNextPracticeActivity(profile: PracticeProfile): PracticeActiv
 /**
  * Returns an updated PracticeProfile after a completed activity.
  * Applies TALAS practice adaptation rules:
- *   - score >= 80 for 3 consecutive attempts → level up (max 3)
+ *   - score >= 80 for 3 consecutive attempts → level up (max 5)
  *   - score 60–79 → stay at current level
  *   - score < 60 for 2 consecutive attempts → level down (min 1)
+ *
+ * IMPORTANT: only Mixed Reading activities (levelEvidence = true) count toward
+ * level movement. Focused-skill activities (word recognition, vocabulary,
+ * comprehension drills, read aloud) are supportive only — the completion is
+ * still recorded, but the consecutive-streak counters and the level are left
+ * unchanged. This matches the Content Bank's rule that mixed-reading activities
+ * provide the stronger evidence for adaptive level movement.
+ *
  * Does NOT touch the learner's Formal Assessment result.
  */
 export function updatePracticeLevel(
@@ -110,11 +148,19 @@ export function updatePracticeLevel(
     currentLevel: profile.currentLevel,
   }
 
+  // Focused-skill activities don't provide level evidence — record the
+  // completion/score but leave streaks and level untouched.
+  const def = activityRegistry.find((a) => a.id === completedActivityId)
+  const providesLevelEvidence = def?.levelEvidence ?? false
+  if (!providesLevelEvidence) {
+    return updated
+  }
+
   if (scorePercent >= 80) {
     updated.consecutiveHighScores += 1
     updated.consecutiveLowScores = 0
     if (updated.consecutiveHighScores >= 3) {
-      updated.currentLevel = Math.min(3, updated.currentLevel + 1)
+      updated.currentLevel = Math.min(MAX_PRACTICE_LEVEL, updated.currentLevel + 1)
       updated.consecutiveHighScores = 0
     }
   } else if (scorePercent >= 60) {

@@ -1,5 +1,9 @@
 import { useEffect, useState } from 'react'
 import { getAll, syncNow, type ReadingAttempt } from '../../../data'
+import { LEARNERS } from './sectionData'
+
+/** Only attempts belonging to a real roster learner are counted/shown. */
+const ROSTER_IDS = new Set(LEARNERS.map((l) => l.id))
 
 export interface SubmissionsIndex {
   /** attempts grouped by learnerId */
@@ -32,7 +36,9 @@ export function useSubmissions(): SubmissionsIndex & { refresh: () => void } {
     async function readLocal() {
       const all = await getAll('readingAttempts')
       if (cancelled) return
-      const live = all.filter((a) => a.deleted !== true)
+      // Keep only live attempts that belong to a real roster learner — this
+      // ignores stray test data (e.g. old 'learner-maria' seed attempts).
+      const live = all.filter((a) => a.deleted !== true && ROSTER_IDS.has(a.learnerId))
       const byLearner: Record<string, ReadingAttempt[]> = {}
       for (const a of live) {
         ;(byLearner[a.learnerId] ??= []).push(a)

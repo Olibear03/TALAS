@@ -32,7 +32,7 @@ function toneForAccuracy(pct: number): string {
  */
 function RecentActivity() {
   const navigate = useNavigate()
-  const { byLearner } = useSubmissions()
+  const { byLearner, refresh } = useSubmissions()
 
   // Flatten every learner's attempts, newest first, take the latest few.
   const feed: ReadingAttempt[] = Object.values(byLearner)
@@ -44,12 +44,13 @@ function RecentActivity() {
     <section className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm flex flex-col gap-5">
       <div className="flex items-center justify-between">
         <h2 className="font-display text-lg font-bold text-charcoal">Recent Submissions</h2>
-        {feed.length > 0 && (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-sprout-50 text-sprout-500 font-sans text-xs font-semibold">
-            <span className="w-2 h-2 rounded-full bg-sprout-500 animate-pulse" />
-            Live
-          </span>
-        )}
+        <button
+          type="button"
+          onClick={refresh}
+          className="font-sans text-xs font-semibold text-sprout-500 hover:underline"
+        >
+          Refresh
+        </button>
       </div>
 
       {feed.length === 0 ? (

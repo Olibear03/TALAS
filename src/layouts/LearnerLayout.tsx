@@ -1,12 +1,10 @@
 ﻿import { NavLink, Outlet, useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, Compass, Lock, Bandage, TrendingUp, Check, Printer, SquarePen, type LucideIcon } from 'lucide-react'
+import { ArrowLeft, Compass, TrendingUp, Check, Printer, SquarePen, type LucideIcon } from 'lucide-react'
 import { learnerProfile, crlaLabel, crlaDescription } from '../features/teacher/dashboard/sectionData'
-import { useReadingAttempts } from '../features/teacher/profile/useReadingAttempts'
+import { useCrlaGrade, crlaBadgeClasses } from '../features/teacher/profile/useCrlaGrade'
 
 const TABS: { to: string; label: string; icon: LucideIcon; end?: boolean }[] = [
   { to: '', label: 'Overview', icon: Compass, end: true },
-  { to: 'formal-assessment', label: 'Formal Assessments', icon: Lock },
-  { to: 'recommendations', label: 'Intervention History', icon: Bandage },
   { to: 'activities', label: 'Practice Progress', icon: TrendingUp },
 ]
 
@@ -20,9 +18,10 @@ function LearnerLayout() {
   const { learnerId } = useParams()
   const profile = learnerProfile(learnerId)
   const base = `/teacher/learners/${learnerId}`
+  // CRLA grade derived from REAL submissions (best accuracy → CRLA level).
+  const grade = useCrlaGrade(learnerId)
   // Latest submission (newest first) — the "Review Assessment" button opens it.
-  const { attempts } = useReadingAttempts(learnerId)
-  const latestAttempt = attempts[0]
+  const latestAttempt = grade.attempts[0]
 
   if (!profile) {
     return (
@@ -64,7 +63,7 @@ function LearnerLayout() {
         </div>
         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sprout-50 text-sprout-500 font-sans text-xs font-semibold">
           <span className="w-2 h-2 rounded-full bg-sprout-500 animate-pulse" />
-          {profile.status}
+          {grade.assessed ? 'Active Learner' : profile.status}
         </span>
       </div>
 
@@ -95,14 +94,16 @@ function LearnerLayout() {
                   Formal reading level
                 </span>
                 <span className="font-display text-base font-bold text-charcoal">
-                  {record.level ?? '—'}
+                  {grade.level ?? '—'}
                 </span>
-                <span className="inline-flex px-2 py-0.5 rounded-full bg-crla-fr/15 text-crla-fr font-sans text-xs font-bold">
-                  {crlaLabel(record.level)}
+                <span
+                  className={`inline-flex px-2 py-0.5 rounded-full font-sans text-xs font-bold ${crlaBadgeClasses(grade.level)}`}
+                >
+                  {crlaLabel(grade.level)}
                 </span>
               </div>
               <p className="font-display text-xs text-gray-500 leading-relaxed max-w-xl">
-                {crlaDescription(record.level)}
+                {crlaDescription(grade.level)}
               </p>
               <div className="flex flex-wrap items-center gap-2 pt-1">
                 <span className="px-2.5 py-1 rounded-md bg-paper border border-gray-100 font-sans text-xs font-semibold text-charcoal">

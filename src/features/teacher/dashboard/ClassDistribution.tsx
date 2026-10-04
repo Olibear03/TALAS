@@ -1,8 +1,9 @@
 ﻿import { learnersForSection } from './sectionData'
 import { useSubmissions } from './useSubmissions'
+import { profileFromAccuracy, type CrlaProfile } from '../../../reading/crla'
 
 interface CrlaBand {
-  key: 'GR' | 'LR' | 'MR' | 'FR'
+  key: CrlaProfile
   label: string
   color: string
 }
@@ -13,14 +14,6 @@ const BANDS: CrlaBand[] = [
   { key: 'MR', label: 'Moderate Refresher', color: 'bg-crla-mr' },
   { key: 'FR', label: 'Full Refresher', color: 'bg-crla-fr' },
 ]
-
-/** Maps a best-accuracy % to a CRLA band for the distribution chart. */
-function bandForAccuracy(pct: number): CrlaBand['key'] {
-  if (pct >= 80) return 'GR'
-  if (pct >= 60) return 'LR'
-  if (pct >= 40) return 'MR'
-  return 'FR'
-}
 
 interface ClassDistributionProps {
   sectionId?: string
@@ -37,7 +30,7 @@ function ClassDistribution({ sectionId = 'all' }: ClassDistributionProps) {
     const attempts = byLearner[l.id] ?? []
     if (attempts.length === 0) continue
     const best = Math.max(...attempts.map((a) => a.accuracy))
-    const key = bandForAccuracy(best)
+    const key = profileFromAccuracy(best)
     const bucket = counts.find((c) => c.key === key)
     if (bucket) bucket.count++
   }

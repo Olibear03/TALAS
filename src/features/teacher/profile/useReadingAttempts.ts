@@ -1,33 +1,24 @@
 import { useEffect, useState } from 'react'
 import {
   listReadingAttemptsByLearner,
-  getAll,
   syncNow,
   getRecordingUrl,
   isRecordingStorageConfigured,
   type ReadingAttempt,
 } from '../../../data'
 
-interface DebugInfo {
-  totalInDb: number
-  allIds: string[]
-}
-
 /**
- * Loads a learner's reading attempts from the local data layer (IndexedDB) for
- * the teacher review. Triggers a sync first so attempts a learner submitted on
- * another device are pulled in before we read. Re-reads on mount and whenever
- * the learnerId changes.
+ * Loads a SINGLE learner's reading attempts from the local data layer
+ * (IndexedDB), filtered strictly to that learnerId — never other students.
+ * Triggers a sync first so attempts submitted on another device are pulled in.
  */
 export function useReadingAttempts(learnerId: string | undefined): {
   attempts: ReadingAttempt[]
   loading: boolean
   refresh: () => void
-  debug: DebugInfo
 } {
   const [attempts, setAttempts] = useState<ReadingAttempt[]>([])
   const [loading, setLoading] = useState(true)
-  const [debug, setDebug] = useState<DebugInfo>({ totalInDb: 0, allIds: [] })
   const [tick, setTick] = useState(0)
 
   useEffect(() => {
@@ -42,15 +33,8 @@ export function useReadingAttempts(learnerId: string | undefined): {
         return
       }
       const list = await listReadingAttemptsByLearner(learnerId)
-      // Debug: what's actually in the store, regardless of id match.
-      const everything = await getAll('readingAttempts')
-      const live = everything.filter((a) => a.deleted !== true)
       if (!cancelled) {
         setAttempts(list)
-        setDebug({
-          totalInDb: live.length,
-          allIds: [...new Set(live.map((a) => a.learnerId))],
-        })
         setLoading(false)
       }
     }
@@ -74,7 +58,7 @@ export function useReadingAttempts(learnerId: string | undefined): {
     }
   }, [learnerId, tick])
 
-  return { attempts, loading, refresh: () => setTick((t) => t + 1), debug }
+  return { attempts, loading, refresh: () => setTick((t) => t + 1) }
 }
 
 /**

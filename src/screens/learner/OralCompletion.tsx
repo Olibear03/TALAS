@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import FrogMascot from '../../components/FrogMascot'
 import type { OralResult } from './OralAssessment'
+import { accuracyEncouragement } from '../../reading/crla'
 
 interface Props {
   result: OralResult | null
@@ -12,20 +13,16 @@ export default function OralCompletion({ result, onContinue }: Props) {
   const [playTime, setPlayTime] = useState(0)
 
   const accuracy = result?.accuracy ?? 0
-  const tone =
-    accuracy >= 80 ? 'strong' : accuracy >= 60 ? 'ok' : 'weak'
+  // Tone + encouragement come from the CRLA standard (see reading/crla.ts) so
+  // the learner's feedback matches the proficiency level the teacher sees.
+  const { tone, label: encouragement } = accuracyEncouragement(accuracy)
   const toneColor =
     tone === 'strong'
       ? 'var(--talas-green)'
       : tone === 'ok'
         ? 'var(--talas-blue)'
         : 'var(--talas-coral)'
-  const label =
-    tone === 'strong'
-      ? 'Mahusay! 🎉'
-      : tone === 'ok'
-        ? 'Magaling, ituloy mo lang!'
-        : 'Magaling sa pagsubok!'
+  const label = tone === 'strong' ? `${encouragement} 🎉` : encouragement
 
   function seekToWord(timeSec?: number) {
     const audio = audioRef.current

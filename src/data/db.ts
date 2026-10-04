@@ -17,8 +17,9 @@ const DB_NAME = "talas";
  * v1: initial entity stores.
  * v2: added the `syncState` key-value store for offline/online sync.
  * v3: added `readingPassages` + `readingAttempts` stores (oral reading assessment).
+ * v4: added `silentAttempts` store (silent-reading comprehension results).
  */
-const DB_VERSION = 3;
+const DB_VERSION = 4;
 
 let dbPromise: Promise<IDBDatabase> | null = null;
 
@@ -56,6 +57,11 @@ export function openDB(): Promise<IDBDatabase> {
           if (name === STORES.readingAttempts) {
             store.createIndex("by_learner", "learnerId", { unique: false });
             store.createIndex("by_passage", "passageId", { unique: false });
+          }
+
+          // Silent comprehension attempts are also queried per learner.
+          if (name === STORES.silentAttempts) {
+            store.createIndex("by_learner", "learnerId", { unique: false });
           }
         }
       }
@@ -191,6 +197,18 @@ export async function getReadingAttemptsByLearner(
   const index = tx.objectStore(STORES.readingAttempts).index("by_learner");
   return promisifyRequest(
     index.getAll(learnerId) as IDBRequest<StoreEntityMap["readingAttempts"][]>,
+  );
+}
+
+/** Returns all silent comprehension attempts for a learner. */
+export async function getSilentAttemptsByLearner(
+  learnerId: string,
+): Promise<StoreEntityMap["silentAttempts"][]> {
+  const db = await openDB();
+  const tx = db.transaction(STORES.silentAttempts, "readonly");
+  const index = tx.objectStore(STORES.silentAttempts).index("by_learner");
+  return promisifyRequest(
+    index.getAll(learnerId) as IDBRequest<StoreEntityMap["silentAttempts"][]>,
   );
 }
 

@@ -1,7 +1,5 @@
 import ComprehensionActivity from './ComprehensionActivity'
-import VocabularyActivity from './VocabularyActivity'
-import ReadAloudActivity from './ReadAloudActivity'
-import WordPracticeActivity from './WordPracticeActivity'
+import { getActivity } from '../../../data/contentBank'
 
 interface Props {
   activityId: string
@@ -11,25 +9,26 @@ interface Props {
 
 /**
  * Routes to the correct activity component based on activityId.
- * Adding a new activity = add an entry to practiceData.ts + a case here.
+ *
+ * All Content Bank activities (mixed-reading, comprehension, word-recognition,
+ * vocabulary, read-aloud) are passage + multiple-choice (or passage-only), so
+ * they render through the generic ComprehensionActivity driven by the activity
+ * id — which pulls the right passage, questions, and difficult words from the
+ * Content Bank. Adding a new activity = add it to contentBank.ts.
  */
 export default function PracticeActivity({ activityId, onComplete, onBack }: Props) {
+  const activity = getActivity(activityId)
+  if (activity) {
+    return (
+      <ComprehensionActivity
+        activityId={activityId}
+        onComplete={onComplete}
+        onBack={onBack}
+      />
+    )
+  }
+
   switch (activityId) {
-    case 'practice-001':
-      return <ComprehensionActivity onComplete={onComplete} onBack={onBack} />
-    case 'practice-002':
-      return <VocabularyActivity onComplete={onComplete} onBack={onBack} />
-    case 'practice-003':
-      return <ReadAloudActivity onComplete={onComplete} onBack={onBack} />
-    case 'practice-004':
-      return <WordPracticeActivity onComplete={onComplete} onBack={onBack} />
-    // Level 2–3 activities share MVP content with level 1 counterparts
-    case 'practice-005':
-      return <ComprehensionActivity onComplete={onComplete} onBack={onBack} />
-    case 'practice-006':
-      return <VocabularyActivity onComplete={onComplete} onBack={onBack} />
-    case 'practice-007':
-      return <ComprehensionActivity onComplete={onComplete} onBack={onBack} />
     default:
       // Unknown activity — show a friendly fallback
       return (

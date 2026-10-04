@@ -6,6 +6,10 @@ interface Props {
   onStartAssessment: () => void
   onStartPractice: () => void
   onGoToProfile: () => void
+  /** Automatically selected reading title after the baseline assessment. */
+  readingTitle?: string
+  /** Automatically selected Content Bank level (1–5). */
+  automaticLevel?: number
 }
 
 function getInitials(name: string): string {
@@ -83,6 +87,8 @@ export default function LearnerDashboard({
   onStartAssessment,
   onStartPractice,
   onGoToProfile,
+  readingTitle,
+  automaticLevel,
 }: Props) {
   const displayName = learnerName.split(' ')[0] || learnerName || 'Mag-aaral'
   const initials = getInitials(learnerName || 'M')
@@ -293,8 +299,25 @@ export default function LearnerDashboard({
                 Pasalitang Pagbasa
               </div>
               <div style={{ fontFamily: FONT_READ, fontSize: '14px', color: '#6B7280', marginTop: '4px' }}>
-                {mockAssignment.title}
+                {readingTitle ?? mockAssignment.title}
               </div>
+              {readingTitle && automaticLevel && (
+                <div
+                  style={{
+                    display: 'inline-block',
+                    marginTop: '6px',
+                    background: 'var(--talas-sky)',
+                    color: 'var(--talas-blue)',
+                    borderRadius: '999px',
+                    padding: '2px 10px',
+                    fontFamily: FONT_UI,
+                    fontSize: '11px',
+                    fontWeight: 700,
+                  }}
+                >
+                  Awtomatikong Antas {automaticLevel}
+                </div>
+              )}
             </div>
 
             <button

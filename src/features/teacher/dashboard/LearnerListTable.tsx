@@ -1,9 +1,39 @@
 ﻿import { useNavigate } from 'react-router-dom'
 import { learnersForSection, isLearnerActive, type CrlaLevel } from './sectionData'
 import { useSubmissions } from './useSubmissions'
+import { profileFromAccuracy } from '../../../reading/crla'
+import type { ReadingAttempt } from '../../../data'
 
 interface LearnerListTableProps {
   sectionId?: string
+}
+
+/**
+ * Derives a CRLA level from a learner's submissions using the CRLA standard
+ * (see reading/crla.ts). Based on the learner's best oral-reading accuracy.
+ */
+function levelFromAttempts(attempts: ReadingAttempt[]): CrlaLevel {
+  if (attempts.length === 0) return null
+  const best = Math.max(...attempts.map((a) => a.accuracy))
+  return profileFromAccuracy(best)
+}
+
+/** Relative "x min/hour/day ago" from an ISO timestamp. */
+function timeAgo(iso: string): string {
+  const then = new Date(iso).getTime()
+  if (Number.isNaN(then)) return '—'
+  const mins = Math.round((Date.now() - then) / 60000)
+  if (mins < 1) return 'Just now'
+  if (mins < 60) return `${mins}m ago`
+  const hrs = Math.round(mins / 60)
+  if (hrs < 24) return `${hrs}h ago`
+  return `${Math.round(hrs / 24)}d ago`
+}
+
+/** The most recent attempt's createdAt, or null. */
+function latestTime(attempts: ReadingAttempt[]): string | null {
+  if (attempts.length === 0) return null
+  return attempts.reduce((max, a) => (a.createdAt > max ? a.createdAt : max), attempts[0].createdAt)
 }
 
 const LEVEL_META: Record<Exclude<CrlaLevel, null>, { label: string; cls: string }> = {
@@ -71,43 +101,62 @@ function LearnerListTable({ sectionId = 'all' }: LearnerListTableProps) {
                 </td>
               </tr>
             ) : (
-              learners.map((l) => (
-                <tr
-                  key={l.id}
-                  onClick={() => navigate(`/teacher/learners/${l.id}`)}
-                  className="border-b border-gray-50 last:border-0 hover:bg-paper cursor-pointer"
-                >
-                  <td className="px-6 py-3">
-                    <div className="flex items-center gap-3">
-                      <span className="w-9 h-9 rounded-full bg-sprout-50 text-sprout-500 flex items-center justify-center font-sans text-xs font-bold">
-                        {l.initials}
-                      </span>
-                      <span className="font-sans text-sm font-semibold text-charcoal">{l.name}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-3 font-sans text-sm text-gray-600">{l.grade}</td>
-                  <td className="px-6 py-3"><LevelBadge level={l.level} /></td>
-                  <td className="px-6 py-3">
-                    {byLearner[l.id]?.length ? (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-coral-50 text-coral-500 font-sans text-xs font-bold">
-                        {byLearner[l.id].length} to review
-                      </span>
-                    ) : (
-                      <span className="font-sans text-sm text-gray-400">—</span>
-                    )}
-                  </td>
-                  <td className="px-6 py-3">
-                    {isLearnerActive(l.id) ? (
-                      <span className="inline-flex items-center gap-1.5 font-sans text-sm font-semibold text-sprout-500">
-                        <span className="w-2 h-2 rounded-full bg-sprout-500 animate-pulse" />
-                        Now
-                      </span>
-                    ) : (
-                      <span className="font-sans text-sm text-gray-400">{l.lastActive}</span>
-                    )}
-                  </td>
-                </tr>
-              ))
+              learners.map((l) => {
+                const attempts = byLearner[l.id] ?? []
+                // Latest attempt first — the "to review" badge opens it directly.
+                const sorted = [...attempts].sort((a, b) =>
+                  a.createdAt < b.createdAt ? 1 : -1,
+                )
+                const latest = sorted[0]
+                const level = levelFromAttempts(attempts)
+                const lastTime = latestTime(attempts)
+                return (
+                  <tr
+                    key={l.id}
+                    onClick={() => navigate(`/teacher/learners/${l.id}`)}
+                    className="border-b border-gray-50 last:border-0 hover:bg-paper cursor-pointer"
+                  >
+                    <td className="px-6 py-3">
+                      <div className="flex items-center gap-3">
+                        <span className="w-9 h-9 rounded-full bg-sprout-50 text-sprout-500 flex items-center justify-center font-sans text-xs font-bold">
+                          {l.initials}
+                        </span>
+                        <span className="font-sans text-sm font-semibold text-charcoal">{l.name}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-3 font-sans text-sm text-gray-600">{l.grade}</td>
+                    <td className="px-6 py-3"><LevelBadge level={level} /></td>
+                    <td className="px-6 py-3">
+                      {latest ? (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            navigate(`/teacher/activities/${latest.id}/review`)
+                          }}
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-coral-50 text-coral-500 font-sans text-xs font-bold hover:bg-coral-100 transition-colors"
+                        >
+                          {attempts.length} to review
+                        </button>
+                      ) : (
+                        <span className="font-sans text-sm text-gray-400">—</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-3">
+                      {isLearnerActive(l.id) ? (
+                        <span className="inline-flex items-center gap-1.5 font-sans text-sm font-semibold text-sprout-500">
+                          <span className="w-2 h-2 rounded-full bg-sprout-500 animate-pulse" />
+                          Now
+                        </span>
+                      ) : (
+                        <span className="font-sans text-sm text-gray-400">
+                          {lastTime ? timeAgo(lastTime) : '—'}
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                )
+              })
             )}
           </tbody>
         </table>

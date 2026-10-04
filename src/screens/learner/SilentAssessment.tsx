@@ -1,23 +1,37 @@
 import { useState, useEffect, useRef } from 'react'
 import { mockQuiz, mockPassage } from '../../data/mockData'
 import type { QuizQuestion } from '../../data/mockData'
+import { save, syncNow, type SilentQuestionResponse } from '../../data'
+
+const SILENT_ASSESSMENT_ID = 'silent-ang-batang-magsasaka-v1'
+const SILENT_TITLE = 'Ang Batang Magsasaka'
+
+export interface SilentResult {
+  correctAnswers: number
+  totalQuestions: number
+  scorePercent: number
+  durationSec: number
+}
 
 interface Props {
-  onComplete: () => void
+  learnerId: string
+  onComplete: (result: SilentResult) => void
 }
 
 function formatTime(s: number): string {
   return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`
 }
 
-export default function SilentAssessment({ onComplete }: Props) {
+export default function SilentAssessment({ learnerId, onComplete }: Props) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0)
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
   const [hasAnswered, setHasAnswered] = useState<boolean>(false)
   const [questionSeconds, setQuestionSeconds] = useState<number>(0)
-  // Hard lock: once a choice is registered for the current question, no further
-  // selection is accepted — even a fast double-tap before React re-renders.
+  const [correctCount, setCorrectCount] = useState(0)
+  const [responses, setResponses] = useState<SilentQuestionResponse[]>([])
+  // Hard locks prevent duplicate answer registration and duplicate submission.
   const lockedRef = useRef<boolean>(false)
+  const submittedRef = useRef(false)
 
   const questions: QuizQuestion[] = mockQuiz
   const currentQuestion = questions[currentQuestionIndex]
@@ -37,13 +51,59 @@ export default function SilentAssessment({ onComplete }: Props) {
     // Reject if already answered OR a selection is already locked in this tick.
     if (hasAnswered || lockedRef.current) return
     lockedRef.current = true
+    const correct = idx === currentQuestion.correctIndex
     setSelectedIndex(idx)
     setHasAnswered(true)
+    if (correct) setCorrectCount((count) => count + 1)
+    setResponses((current) => [
+      ...current,
+      {
+        questionId: `${SILENT_ASSESSMENT_ID}-q${currentQuestionIndex + 1}`,
+        selectedIndex: idx,
+        correct,
+        durationSec: questionSeconds,
+      },
+    ])
   }
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (isLastQuestion) {
-      onComplete()
+      if (submittedRef.current) return
+      submittedRef.current = true
+
+      const totalQuestions = questions.length
+      const scorePercent = totalQuestions > 0
+        ? Math.round((correctCount / totalQuestions) * 100)
+        : 0
+      const durationSec = responses.reduce((total, response) => total + response.durationSec, 0)
+      const result: SilentResult = {
+        correctAnswers: correctCount,
+        totalQuestions,
+        scorePercent,
+        durationSec,
+      }
+
+      try {
+        await save('silentAttempts', {
+          id: `silent-attempt-${SILENT_ASSESSMENT_ID}-${Date.now()}`,
+          learnerId,
+          assessmentId: SILENT_ASSESSMENT_ID,
+          title: SILENT_TITLE,
+          correctAnswers: correctCount,
+          totalQuestions,
+          scorePercent,
+          responses,
+          durationSec,
+          online: navigator.onLine,
+          createdAt: new Date().toISOString(),
+        })
+        // Best effort: offline records remain dirty and sync on reconnect.
+        void syncNow()
+      } catch (error) {
+        console.error('[TALAS] Failed to save silent assessment:', error)
+      }
+
+      onComplete(result)
       return
     }
     // Move strictly forward, one question at a time, and unlock for the next.
@@ -54,8 +114,7 @@ export default function SilentAssessment({ onComplete }: Props) {
     setQuestionSeconds(0)
   }
 
-  const wordCount =
-    mockPassage[0].split(' ').length + (mockPassage[1] ? mockPassage[1].split(' ').length : 0)
+  const wordCount = mockPassage.join(' ').trim().split(/\s+/).filter(Boolean).length
 
   const progressFill =
     ((currentQuestionIndex + (hasAnswered ? 1 : 0)) / questions.length) * 100
@@ -394,7 +453,7 @@ export default function SilentAssessment({ onComplete }: Props) {
           <button
             type="button"
             disabled={!hasAnswered}
-            onClick={handleNext}
+            onClick={() => void handleNext()}
             style={{
               marginTop: '16px',
               width: '100%',

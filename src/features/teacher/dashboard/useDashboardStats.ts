@@ -1,5 +1,6 @@
 ﻿import { learnersForSection, isLearnerActive } from './sectionData'
 import { useSubmissions } from './useSubmissions'
+import { profileFromAccuracy } from '../../../reading/crla'
 
 /** Aggregate counts shown in the dashboard quick-stats row. */
 export interface DashboardStats {
@@ -13,8 +14,10 @@ export interface DashboardStats {
 /**
  * Derives dashboard stats from REAL submitted reading attempts (not the static
  * roster). A learner counts as "assessed" once they have at least one attempt;
- * "need support" if their best accuracy is below 60%; "needs review" is the
- * total number of submissions in scope; "active today" reflects live sessions.
+ * "need support" if their best CRLA level is a Moderate or Full Refresher (the
+ * profiles that require structured/intensive intervention); "needs review" is
+ * the total number of submissions in scope; "active today" reflects live
+ * sessions.
  */
 export function useDashboardStats(sectionId: string = 'all'): DashboardStats {
   const learners = learnersForSection(sectionId)
@@ -31,7 +34,8 @@ export function useDashboardStats(sectionId: string = 'all'): DashboardStats {
       assessedCount++
       needsReviewCount += attempts.length
       const bestAccuracy = Math.max(...attempts.map((a) => a.accuracy))
-      if (bestAccuracy < 60) needSupportCount++
+      const level = profileFromAccuracy(bestAccuracy)
+      if (level === 'MR' || level === 'FR') needSupportCount++
     }
     if (isLearnerActive(l.id)) activeTodayCount++
   }

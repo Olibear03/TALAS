@@ -173,6 +173,35 @@ export interface ReadingAttempt extends SyncMeta {
   createdAt: ISODateString;
 }
 
+/** One locked answer captured during a silent-reading assessment. */
+export interface SilentQuestionResponse {
+  questionId: string;
+  selectedIndex: number;
+  correct: boolean;
+  /** Seconds elapsed before the learner selected this answer. */
+  durationSec: number;
+}
+
+/**
+ * A learner's silent-reading comprehension attempt. Kept separate from oral
+ * ReadingAttempt records because it has questions/answers rather than a speech
+ * transcript, word timings, and audio.
+ */
+export interface SilentAttempt extends SyncMeta {
+  id: string;
+  learnerId: string;
+  assessmentId: string;
+  title: string;
+  correctAnswers: number;
+  totalQuestions: number;
+  /** 0–100 comprehension score. */
+  scorePercent: number;
+  responses: SilentQuestionResponse[];
+  durationSec: number;
+  online: boolean;
+  createdAt: ISODateString;
+}
+
 /**
  * Names of the entity object stores. Single source of truth. These all hold
  * records keyed by `id` and participate in sync.
@@ -184,6 +213,7 @@ export const STORES = {
   assignments: "assignments",
   readingPassages: "readingPassages",
   readingAttempts: "readingAttempts",
+  silentAttempts: "silentAttempts",
 } as const;
 
 export type StoreName = (typeof STORES)[keyof typeof STORES];
@@ -213,6 +243,7 @@ export interface StoreEntityMap {
   assignments: Assignment;
   readingPassages: ReadingPassage;
   readingAttempts: ReadingAttempt;
+  silentAttempts: SilentAttempt;
 }
 
 /** Any persisted entity (union across the entity stores). */

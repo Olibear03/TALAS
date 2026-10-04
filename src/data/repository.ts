@@ -18,6 +18,7 @@ import {
   put,
   getAssignmentsByLearner,
   getReadingAttemptsByLearner,
+  getSilentAttemptsByLearner,
 } from "./db";
 import type { Entity, StoreEntityMap, StoreName } from "./types";
 
@@ -113,4 +114,24 @@ export async function listReadingAttemptsByLearner(
   return all
     .filter(isLive)
     .sort((a, b) => (b.createdAt < a.createdAt ? -1 : 1));
+}
+/** Lists live silent comprehension attempts for a learner, newest first. */
+export async function listSilentAttemptsByLearner(
+  learnerId: string,
+): Promise<StoreEntityMap["silentAttempts"][]> {
+  let all: StoreEntityMap["silentAttempts"][];
+  try {
+    all = await getSilentAttemptsByLearner(learnerId);
+  } catch {
+    // Resilient fallback for a database opened before the v4 index existed.
+    const everything = await getAll("silentAttempts");
+    all = everything.filter((a) => a.learnerId === learnerId);
+  }
+  return all
+    .filter(isLive)
+    .sort((a, b) =>
+      b.createdAt === a.createdAt
+        ? b.id.localeCompare(a.id)
+        : b.createdAt.localeCompare(a.createdAt),
+    );
 }

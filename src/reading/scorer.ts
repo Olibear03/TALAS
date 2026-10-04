@@ -17,6 +17,7 @@
  */
 
 import type { WordResult } from "../data/types";
+import { accuracyEncouragement } from "./crla";
 
 /**
  * Normalizes a single token for comparison:
@@ -300,12 +301,14 @@ export function readingProgress(
   return { read, cursor: displayCursor };
 }
 
-/** Maps an accuracy score to a learner-friendly band + label. */
+/**
+ * Maps an accuracy score to a learner-friendly band + label. Thresholds come
+ * from the CRLA standard (see `crla.ts`) so the learner's encouragement is
+ * consistent with the proficiency level the teacher sees.
+ */
 export function accuracyBand(accuracy: number): {
   tone: "strong" | "ok" | "weak";
   label: string;
 } {
-  if (accuracy >= 80) return { tone: "strong", label: "Mahusay!" };
-  if (accuracy >= 60) return { tone: "ok", label: "Magaling, ituloy mo lang!" };
-  return { tone: "weak", label: "Subukan nating muli." };
+  return accuracyEncouragement(accuracy);
 }
