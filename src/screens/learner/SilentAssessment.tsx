@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { mockQuiz, mockPassage } from '../../data/mockData'
 import type { QuizQuestion } from '../../data/mockData'
 
@@ -15,6 +15,9 @@ export default function SilentAssessment({ onComplete }: Props) {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
   const [hasAnswered, setHasAnswered] = useState<boolean>(false)
   const [questionSeconds, setQuestionSeconds] = useState<number>(0)
+  // Hard lock: once a choice is registered for the current question, no further
+  // selection is accepted — even a fast double-tap before React re-renders.
+  const lockedRef = useRef<boolean>(false)
 
   const questions: QuizQuestion[] = mockQuiz
   const currentQuestion = questions[currentQuestionIndex]
@@ -31,7 +34,9 @@ export default function SilentAssessment({ onComplete }: Props) {
   }, [currentQuestionIndex])
 
   const handleSelect = (idx: number) => {
-    if (hasAnswered) return
+    // Reject if already answered OR a selection is already locked in this tick.
+    if (hasAnswered || lockedRef.current) return
+    lockedRef.current = true
     setSelectedIndex(idx)
     setHasAnswered(true)
   }
@@ -41,6 +46,8 @@ export default function SilentAssessment({ onComplete }: Props) {
       onComplete()
       return
     }
+    // Move strictly forward, one question at a time, and unlock for the next.
+    lockedRef.current = false
     setCurrentQuestionIndex((prev) => prev + 1)
     setSelectedIndex(null)
     setHasAnswered(false)
@@ -297,10 +304,15 @@ export default function SilentAssessment({ onComplete }: Props) {
               }
             }
 
+            // Dim the choices the student did NOT pick once locked, so it's
+            // visually clear the answer is final and can't be changed.
+            const dim = hasAnswered && i !== selectedIndex && i !== currentQuestion.correctIndex
+
             return (
               <button
                 key={i}
                 type="button"
+                disabled={hasAnswered}
                 onClick={() => handleSelect(i)}
                 style={{
                   width: '100%',
@@ -315,9 +327,10 @@ export default function SilentAssessment({ onComplete }: Props) {
                   cursor: hasAnswered ? 'default' : 'pointer',
                   textAlign: 'left',
                   marginBottom: '8px',
-                  transition: 'background 0.2s, border-color 0.2s',
+                  transition: 'background 0.2s, border-color 0.2s, opacity 0.2s',
                   background: bg,
                   border: `2px solid ${borderColor}`,
+                  opacity: dim ? 0.5 : 1,
                 }}
               >
                 <span
